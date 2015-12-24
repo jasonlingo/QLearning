@@ -1,12 +1,11 @@
 import random
 import math
 from Map import Map
-from QLInterface import QLInterface
+from QLEnvironment import QLEnvironment
 import Settings
-# from Util import BFS
 
 
-class Environment(QLInterface):
+class Environment(QLEnvironment):
     """
     An Environment class that inherits from the QLInterface.
     It implements all the methods for QLearning class's needs.
