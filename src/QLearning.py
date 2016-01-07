@@ -1,9 +1,8 @@
 import random
-from Action import Action
 import sys
 import Settings
 
-class QLearning:
+class QLearning(object):
     """
     A Q-learning model.
     """
@@ -25,9 +24,6 @@ class QLearning:
         self.epsilon = epsilon
         self.alpha = alpha
         self.gamma = gamma
-
-        # get all actions from the Action class
-        self.actions = Action.getActions()
 
         # Q value lookup dictionary
         # {((x, y), action): Q value}
@@ -159,3 +155,9 @@ class QLearning:
 
     def getTaxi(self):
         return self.taxi
+
+
+class QValueTable(object):
+    """
+    A class that manages the qvalue table.
+    """

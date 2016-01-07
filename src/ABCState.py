@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class ABCState:
+class ABC_State(object):
     """
     An abstract class for state.
     """
@@ -10,4 +10,3 @@ class ABCState:
     @abstractmethod
     def getState(self):
         raise NotImplementedError()
-

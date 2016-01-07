@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import math
 
 
-class Experiment:
+class Experiment(object):
     """
     The agent class that manages the whole learning process.
     """
 
-    def __init__(self, environment, taxiNum, epsilon=0.2, alpha=0.2, gamma=0.9):
+    def __init__(self, environment, taxiNum, carNum, epsilon=0.1, alpha=0.2, gamma=0.9):
         """
         Construct an experiment object that manages all experiment process.
         :param environment: the given environment for performing experiments
@@ -21,9 +21,10 @@ class Experiment:
         """
         self.env = environment
         self.taxiNum = taxiNum
-        self.EPSILON = epsilon
-        self.ALPHA = alpha
-        self.GAMMA = gamma
+        self.carNum = carNum
+        self.epsilon = epsilon
+        self.alpha = alpha
+        self.gamma = gamma
 
         self.taxiList = []
         self.calledTaxi = []
@@ -111,7 +112,6 @@ class Experiment:
         if not self.plotMap:
             self.env.map.showMap()
             self.plotMap = True
-
 
         # plot the route of called taxis
         for ql in self.calledTaxi:
@@ -207,7 +207,11 @@ class Experiment:
         # print "call taxi no." + str(taxi.getId())
 
     def getEpsilon(self):
-        return max(0.1, self.EPSILON * math.pow(0.9999, self.iteration))
+        """
+        Reduce epsilon gradually when running the learning process for many iterations
+        :return: the adjusted epsilon
+        """
+        return max(0.05, self.epsilon * math.pow(0.9999, self.iteration))
 
     def generateTaxi(self, taxiNum):
         """

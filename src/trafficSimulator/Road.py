@@ -1,7 +1,9 @@
 from Traffic import *
+from Traffic import RoadType
+from Lane import Lane
 
 
-class Road:
+class Road(object):
     """
     A class that represents a road. It will connect to intersections and contain lanes.
     """
@@ -18,15 +20,20 @@ class Road:
         self.corners = corners
         self.center = center
         self.top, self.bottom, self.right, self.left = self.parseCorners(corners)
+
         self.source = source
         self.target = target
         self.avgSpeed = avgSpeed
-        self.id = Traffic.uniqueID(RoadType.ROAD)
+        self.id = Traffic.uniqueId(RoadType.ROAD)
         self.connectedIntersections = []
         self.lanes = []
         self.lanesNumber = None
         self.length = None
         self.setLength()
+        self.targetSide = None
+        self.sourceSide = None
+        self.sourceSideId = None
+        # self.update()
 
     def parseCorners(self, corners):
         """
@@ -92,3 +99,32 @@ class Road:
     def getLength(self):
         if self.length:
             return self.length
+
+    def update(self):
+        if not (self.source and self.target):
+            print "incomplete road"
+        self.sourceSideId = self.source.rect.getSectorId(self.target.rect.center())
+        self.sourceSide = self.source.rect.getSide(self.sourceSideId).subsegment(0.5, 1.0)
+        self.targetSideId = self.target.rect.getSectorId(self.source.rect.center())
+        self.targetSide = self.target.rect.getSide(self.targetSideId).subsegment(0, 0.5)
+        self.lanesNumber = min(self.sourceSide.length, self.targetSide.length)
+        self.lanesNumber = max(2, float(self.lanesNumber) / Traffic.settings.gridSize)
+        sourceSplits = self.sourceSide.split(self.lanesNumber, True)
+        targetSplits = self.targetSide.split(self.lanesNumber);
+        if self.lanes is None or self.lanes.length < self.lanesNumber:
+            if self.lanes is None:
+                self.lanes = []
+            for i in range(self.lanesNumber):
+                if self.lanes[i] is None:
+                    self.lanes[i] = Lane(sourceSplits[i], targetSplits[i], self)
+
+        results = []
+        for i in range(self.lanesNumber):
+            self.lanes[i].sourceSegment = sourceSplits[i]
+            self.lanes[i].targetSegment = targetSplits[i]
+            self.lanes[i].leftAdjacent = self.lanes[i + 1]
+            self.lanes[i].rightAdjacent = self.lanes[i - 1]
+            self.lanes[i].leftmostAdjacent = self.lanes[self.lanesNumber - 1]
+            self.lanes[i].rightmostAdjacent = self.lanes[0]
+            results.append(self.lanes[i].update())
+        return results

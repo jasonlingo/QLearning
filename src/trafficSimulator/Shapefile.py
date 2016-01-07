@@ -7,7 +7,7 @@ from Road import Road
 from Intersection import Intersection
 
 
-class Shapefile:
+class Shapefile(object):
     """
     A class that load road data from a shapefile and output as desired data structure.
     """
@@ -19,8 +19,8 @@ class Shapefile:
         self.ctr = shp.Reader(filename)
         self.shapeRecords = self.ctr.iterShapeRecords()
 
-        self.roads = None
-        self.intersections = None
+        self.roads = {}
+        self.intersections = {}
 
     def getRoads(self):
         """
@@ -44,7 +44,7 @@ class Shapefile:
         """
         Get the data out according to given road type. The road types include
         'Median Hidden', 'Median Island', 'Parking Garage', 'Road Hidden', 'Alley',
-        'Paved Drive', 'Hidden Median', 'Parking Lot', 'Traffic Island', 'Intersection',
+        'Paved Drive', 'Hidden Median', 'Parking Lot', 'trafficSimulator Island', 'Intersection',
         'Road'. The output coordinate will be the center (average of the coordinates)
         of the road type.
 
@@ -84,7 +84,7 @@ class Shapefile:
         if roadType == RoadType.ROAD:
             return Road(corners, center, None, None)
         elif roadType == RoadType.INTERSECTION:
-            return Intersection(corners, center)
+            return Intersection(corners, center, None) # FIXME, rect
 
     def plotMap(self, intersections, roads, interCheck, roadCheck):
         print "Total points:", len(intersections) + len(roads)

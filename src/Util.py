@@ -1,7 +1,7 @@
 import sys
 
 
-class PriorityQueue:
+class PriorityQueue(object):
     """
       Implements a priority queue data structure. Each inserted item
       has a priority associated with it and the client is usually interested
