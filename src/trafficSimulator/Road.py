@@ -19,21 +19,22 @@ class Road(object):
         """
         self.corners = corners
         self.center = center
-        self.top, self.bottom, self.right, self.left = self.parseCorners(corners)
-
         self.source = source
         self.target = target
+
+        self.top, self.bottom, self.right, self.left = self.parseCorners(corners)
         self.avgSpeed = avgSpeed
         self.id = Traffic.uniqueId(RoadType.ROAD)
-        self.connectedIntersections = []
+        # self.connectedIntersections = []
         self.lanes = []
         self.lanesNumber = None
         self.length = None
         self.setLength()
         self.targetSide = None
         self.sourceSide = None
+        self.targetSideId = None
         self.sourceSideId = None
-        # self.update()
+        self.update()
 
     def parseCorners(self, corners):
         """
@@ -41,8 +42,8 @@ class Road(object):
         :param corners: the given corners of this road.
         :return: the four coordinates
         """
-        lats = [p[0] for p in corners]
-        lnts = [p[1] for p in corners]
+        lats = [p.getCoords()[1] for p in corners]
+        lnts = [p.getCoords()[0] for p in corners]
         maxLat = max(lats)
         minLat = min(lats)
         maxLnt = max(lnts)
@@ -64,7 +65,7 @@ class Road(object):
         :return:
         """
         for cor in intersection.corners:
-            if self.bottom <= cor[0] <= self.top and self.left <= cor[1] <= self.right:
+            if self.bottom <= cor.getCoords()[1] <= self.top and self.left <= cor.getCoords()[0] <= self.right:
                 return True
         return False
 
@@ -85,10 +86,12 @@ class Road(object):
     def setSource(self, source):
         self.source = source
         self.setLength()
+        self.update()
 
     def setTarget(self, target):
         self.target = target
         self.setLength()
+        self.update()
 
     def getSource(self):
         return self.source
@@ -101,30 +104,33 @@ class Road(object):
             return self.length
 
     def update(self):
-        if not (self.source and self.target):
-            print "incomplete road"
-        self.sourceSideId = self.source.rect.getSectorId(self.target.rect.center())
-        self.sourceSide = self.source.rect.getSide(self.sourceSideId).subsegment(0.5, 1.0)
-        self.targetSideId = self.target.rect.getSectorId(self.source.rect.center())
-        self.targetSide = self.target.rect.getSide(self.targetSideId).subsegment(0, 0.5)
-        self.lanesNumber = min(self.sourceSide.length, self.targetSide.length)
-        self.lanesNumber = max(2, float(self.lanesNumber) / Traffic.settings.gridSize)
-        sourceSplits = self.sourceSide.split(self.lanesNumber, True)
-        targetSplits = self.targetSide.split(self.lanesNumber);
-        if self.lanes is None or self.lanes.length < self.lanesNumber:
-            if self.lanes is None:
-                self.lanes = []
-            for i in range(self.lanesNumber):
-                if self.lanes[i] is None:
-                    self.lanes[i] = Lane(sourceSplits[i], targetSplits[i], self)
+        if not self.source or not self.target:
+            # print "incomplete road"
+            return
 
-        results = []
-        for i in range(self.lanesNumber):
-            self.lanes[i].sourceSegment = sourceSplits[i]
-            self.lanes[i].targetSegment = targetSplits[i]
-            self.lanes[i].leftAdjacent = self.lanes[i + 1]
-            self.lanes[i].rightAdjacent = self.lanes[i - 1]
-            self.lanes[i].leftmostAdjacent = self.lanes[self.lanesNumber - 1]
-            self.lanes[i].rightmostAdjacent = self.lanes[0]
-            results.append(self.lanes[i].update())
-        return results
+        # self.sourceSideId = self.source.rect.getSectorId(self.target.rect.center())
+        # self.sourceSide = self.source.rect.getSide(self.sourceSideId).subsegment(0.5, 1.0)
+        # self.targetSideId = self.target.rect.getSectorId(self.source.rect.center())
+        # self.targetSide = self.target.rect.getSide(self.targetSideId).subsegment(0, 0.5)
+        # self.lanesNumber = min(self.sourceSide.length, self.targetSide.length)
+        # self.lanesNumber = max(2, float(self.lanesNumber) / Traffic.settings.gridSize)
+        # sourceSplits = self.sourceSide.split(self.lanesNumber, True)
+        # targetSplits = self.targetSide.split(self.lanesNumber)
+        # if self.lanes is None or self.lanes.length < self.lanesNumber:
+        #     if self.lanes is None:
+        #         self.lanes = []
+        #     for i in range(self.lanesNumber):
+        #         if self.lanes[i] is None:
+        #             self.lanes[i] = Lane(sourceSplits[i], targetSplits[i], self)
+        #
+        # # results = []
+        # for i in range(self.lanesNumber):
+        #     self.lanes[i].sourceSegment = sourceSplits[i]
+        #     self.lanes[i].targetSegment = targetSplits[i]
+        #     self.lanes[i].leftAdjacent = self.lanes[i + 1]
+        #     self.lanes[i].rightAdjacent = self.lanes[i - 1]
+        #     self.lanes[i].leftmostAdjacent = self.lanes[self.lanesNumber - 1]
+        #     self.lanes[i].rightmostAdjacent = self.lanes[0]
+        #     # results.append(self.lanes[i].update())
+        # # return results
+        self.lanes.append(Lane(self))

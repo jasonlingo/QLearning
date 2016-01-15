@@ -1,15 +1,16 @@
 from random import shuffle
 from math import radians, cos, sin, asin, sqrt
 from TrafficSettings import *
+from collections import defaultdict
 
 
 class Traffic(object):
-    uniqueid = 0
+    uniqueid = defaultdict(int)
 
     @classmethod
     def uniqueId(cls, idType):
-        cls.uniqueid += 1
-        return idType + "_" + str(cls.uniqueid)
+        cls.uniqueid[idType] += 1
+        return idType + "_" + str(cls.uniqueid[idType])
 
 
 class RoadType(object):
@@ -73,8 +74,8 @@ def haversine(point1, point2):
       (float) distance (in km) between two nodes
     """
     # Convert decimal degrees to radians
-    lat1, lng1 = point1
-    lat2, lng2 = point2
+    lng1, lat1 = point1.getCoords()
+    lng2, lat2 = point2.getCoords()
     lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
 
     # haversine formula

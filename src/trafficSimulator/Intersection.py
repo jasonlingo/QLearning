@@ -42,6 +42,9 @@ class Intersection(object):
             result.append(ird.update())
         return result
 
+    def getId(self):
+        return self.id
+
     def getRoad(self):
         return self.roads
 

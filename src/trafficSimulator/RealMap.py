@@ -1,10 +1,13 @@
 from Shapefile import Shapefile
 from Road import Road
-from Traffic import *
 import pygmaps
 import webbrowser
 import os
 import random
+# import matplotlib
+# matplotlib.use('TKAgg')
+
+from Car import *
 
 class RealMap(object):
     """
@@ -12,67 +15,126 @@ class RealMap(object):
     """
 
     def __init__(self, shapefileName):
+        """
+        Initialize a real map according to a
+        :param shapefileName:
+        :return:
+        """
         self.she = Shapefile(shapefileName)
         self.roads = self.she.getRoads()
         self.intersections = self.she.getIntersections()
+
         self.createMap()
         self.goalLocation = None
+        self.board = self.she.getBoard()  #[top, bot, right, left]
+        self.cars = {}
+        self.taxis = {}
 
     def createMap(self):
         """
         Connect intersections with roads.
         """
-        for inter in self.intersections:
-            for rd in self.roads:
+        print "creating map"
+        # start_time = time.time() # for computing the execution time
+        for inter in self.intersections.values():
+            for rd in self.roads.values():
                 if rd.isConnected(inter):
                     if not rd.getSource():
                         rd.setSource(inter)  # FIXME: should reduce some distance for intersection
                     elif not rd.getTarget():
                         rd.setTarget(inter)
                         # add a road for opposite direction
-                        self.roads.append(Road(rd.corners, rd.center, rd.getTarget(), rd.getSource()))
+                        opRd = Road(rd.corners, rd.center, rd.getTarget(), rd.getSource())
+                        self.roads[opRd.id] = opRd
+        # print (time.time() - start_time), " seconds"
 
-    def randomRoadLocation(self):
+    def getRoads(self):
+        return self.roads
+
+    def getIntersections(self):
+        return self.intersections
+
+    def getBoard(self):
+        return self.board
+
+    def randomLaneLocation(self):
         """
-        Randomly select one road or intersection from the road or intersection set,
-        then pick a random coordinates from the selected road or the center of the
-        selected intersection.
+        Randomly select one road from self.roads and return it.
         :return: the selected location.
         """
-        if random.random() >= 0.5:
-            candidate = random.choice(self.roads)
-            source = candidate.source.center
-            target = candidate.target.center
-            portion = random.random()
-            coors = (source[0] + (target[0] - source[0]) * portion, \
-                     source[1] + (target[1] - source[1]) * portion)
-            loc = Location(coors, candidate.id, None)
-        else:
-            candidate = random.choice(self.intersections)
-            coors = candidate.center
-            loc = Location(coors, None, candidate.id)
-        return loc
+        rd = None
+        while rd is None:
+            tmp = random.choice(self.roads.values())
+            if tmp.getSource() and tmp.getTarget():
+                rd = tmp
+        print rd.lanes
+        lane = random.choice(rd.lanes)
+        position = random.random()
+        return lane, position
 
-    def setGoalLocation(self, loc):
+    def setRandomGoalPosition(self):
         """
-
+        Assign the goal location.
         :param loc:
         :return:
         """
-        self.goalLocation = loc
+        lane, position = self.randomLaneLocation()
+        self.goalLocation = Trajectory(None, lane, position)
+
+    def getGoalPosition(self):
+        return self.goalLocation.getCoords()
+
+    def addRandomCars(self, num):
+        """
+        Add num cars into the self.cars dictionary by their id. If an id already exists in the dictionary, then
+        update the dictionary with the car.
+        :param num: the total number of cars to be added into the dictionary
+        """
+        for i in range(num):
+            lane, position = self.randomLaneLocation()
+            car = Car(lane, position)
+            self.cars[car.id] = car
+
+    def addRandomTaxi(self, num):
+        """
+        Add num taxis into the self.taxis dictionary by their id. If an id already exists in the dictionary, then
+        update the dictionary with this taxi.
+        :param num: the total number of taxis to be added into the dictionary
+        """
+        for i in range(num):
+            lane, position = self.randomLaneLocation()
+            taxi = Taxi(lane, position)
+            self.taxis[taxi.id] = taxi
+
+    def getCars(self):
+        return self.cars
+
+    def getTaxis(self):
+        return self.taxis
+
+    def moveCar(self):
+        """
+        update the coordinates of cars
+        :return: two lists that contain the x and y coordinates
+        """
+        pass
 
     def plotMap(self):
-        # print "Total points:", len(intersections) + len(roads)
-        if not self.intersections and not self.roads:
+        """
+        Plot the map according to the roads and intersections.
+        """
+        print "plotting map"
+        if not self.intersections or not self.roads:
             print "no map to plot"
             return
 
-        mymap = pygmaps.maps(self.intersections[0].center[0], self.intersections[0].center[1], 12)
+        inter = self.intersections.values()[0]
+        mymap = pygmaps.maps(inter.center[0], inter.center[1], 12)
 
-        for inter in self.intersections:
+        for inter in self.intersections.values():
             mymap.addpoint(inter.center[0], inter.center[1], "#0000FF")
 
-        for rd in self.roads:
+        for rd in self.roads.values():
             if rd.getSource() and rd.getTarget():
                 mymap.addpath([rd.getSource().center, rd.getTarget().center], "#00FF00")
                 # mymap.addpoint(point[0], point[1], "#00FF00")
@@ -84,36 +146,39 @@ class RealMap(object):
         url = "file://" + os.getcwd() + "/" + mapFilename
         webbrowser.open_new(url)
 
+# class Location(object):
+#     """
+#     A class that represents a location. It contains the information of the road or intersection id.
+#     """
+#
+#     def __init__(self, coordinates, roadId=None, intersId=None):
+#         """
+#         :param coordinates: the coordinate of this location
+#         :param roadId: if the location is on a road, this records the road id
+#                        that this location belongs to
+#         :param IntersId: if the intersection is on a intersection, this records the
+#                          intersection id this location belongs to
+#         """
+#         self.coordinates = coordinates
+#         self.roadId = roadId
+#         self.intersId = intersId
+#
+#     def equals(self, loc):
+#         """
+#         Check whether the given location is the same with this location.
+#         :param loc: the given location
+#         :return: True if the given location is equal to this location; False otherwise
+#         """
+#         return self.roadId == loc.roadId and self.intersId == loc.intersId and\
+#                self.coordinates == loc.coordinates
 
 
-class Location(object):
-    """
-    A class that represents a location. It contains the information of the road or intersection id.
-    """
-
-    def __init__(self, coordinates, roadId=None, intersId=None):
-        """
-        :param coordinates: the coordinate of this location
-        :param roadId: if the location is on a road, this records the road id
-                       that this location belongs to
-        :param IntersId: if the intersection is on a intersection, this records the
-                         intersection id this location belongs to
-        """
-        self.coordinates = coordinates
-        self.roadId = roadId
-        self.intersId = intersId
-
-    def equals(self, loc):
-        """
-        Check whether the given location is the same with this location.
-        :param loc: the given location
-        :return: True if the given location is equal to this location; False otherwise
-        """
-        return self.roadId == loc.roadId and self.intersId == loc.intersId and\
-               self.coordinates == loc.coordinates
 
 
-# test
+# =========================================================
+# For checking correctness
+# =========================================================
 # rm = RealMap("/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf")
-# rm.createMap()
-# rm.plotMap()
+#
+# rm.plotAnimationMap()
+# ani = animation.FuncAnimation(fig, rm.animation, fargs=(particles))

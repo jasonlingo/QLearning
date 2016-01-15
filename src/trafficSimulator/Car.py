@@ -2,6 +2,7 @@ import random
 import math
 from Trajectory import Trajectory
 from Traffic import *
+from TrafficSettings import *
 
 
 class Car(object):
@@ -9,10 +10,17 @@ class Car(object):
     A class that represents a car.
     """
 
-    def __init__(self, maxSpeed, lane, position):
+    def __init__(self, lane, position=0, maxSpeed=MAX_SPEED):
+        """
+
+        :param lane:
+        :param position: the relative position of this car in the given lane
+        :param maxSpeed:
+        :return:
+        """
         self.id = Traffic.uniqueId("car")
         self.speed = 0
-        self.width = 0.0018   # the unit used here is km
+        self.width = 0.0018  # the unit used here is km
         self.length = 0.0045
         self.distGap = 0.002
         self.maxSpeed = maxSpeed
@@ -25,19 +33,31 @@ class Car(object):
         self.preferedLane = None
 
     def getCoords(self):
-        self.trajectory.coords
+        """
+        Return the coordinates of this car.
+        :return: (lat, lng), lat and lng represents the latitude and longitude respectively
+        """
+        return self.trajectory.getCoords()
 
     def getSpeed(self):
+        """
+        :return: the speed (km/h)
+        """
         return self.speed
 
     def setSpeed(self, speed):
         """
-        Speed should be beteen 0 ~ max speed
+        Set the current speed of this car to the given speed parameter.
+        The speed should be between 0 ~ max.
         :param speed: the new speed
         """
         self.speed = min(self.maxSpeed, max(speed, 0))
 
     def getDirection(self):
+        """
+        Get the current direction of this car.
+        :return:
+        """
         return self.trajectory.direction
 
     def release(self):
@@ -129,17 +149,28 @@ class Car(object):
         self.preferedLane = None
         return nextLane
 
+    def getCurLocation(self):
+        """
+        Get the car's current coordinates and return it.
+        :return:
+        """
+
+        pass
+
 
 class Taxi(Car):
     """
     A class that represents a taxi.
     """
 
-    def __init__(self, maxSpeed, lane, position):
-        super(Taxi, self).__init__(maxSpeed, lane, position)
+    def __init__(self, lane, position, maxSpeed=MAX_SPEED):
+        super(Taxi, self).__init__(lane, position, maxSpeed)
         self.available = True
-        self.destination = None
-        self.source = None
+        self.destRoad = None
+        self.destLane = None
+        self.destPosition = None
+        self.called = False
+        # self.source = None
 
     def setDestination(self, destination):
         """
@@ -148,20 +179,12 @@ class Taxi(Car):
         """
         self.destination = destination
 
-    def setSource(self, source):
-        """
-        Set the source coordinates of this trip.
-        :param source: the coordinates of the source location
-        """
-        self.source = source
-
-    def getCurLocation(self):
-        """
-        Get the car's current coordinates and return it.
-        :return:
-        """
-
-        pass
+    # def setSource(self, source):
+    #     """
+    #     Set the source coordinates of this trip.
+    #     :param source: the coordinates of the source location
+    #     """
+    #     self.source = source
 
     def setRandomAvailability(self):
         """
@@ -176,6 +199,16 @@ class Taxi(Car):
                 self.available = not self.available
                 self.setSource(self.getCurLocation())
 
-x
+    def setAvailable(self, avail):
+        self.available = avail
+
+    def call(self, road, lane, position):
+        if not self.available:
+            return False
+        self.setAvailable(False)
+        self.called = True
+        self.destRoad = road
+        self.destLane = lane
+        self.destPosition = position
 
 

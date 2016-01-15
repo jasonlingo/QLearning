@@ -11,23 +11,23 @@ class Environment(QLEnvironment):
     It implements all the methods for QLearning class's needs.
     """
 
-    def __init__(self, map):
+    def __init__(self, realMap):
         """
-        :param map (RealMap): the map for this environment
+        :param realMap (RealMap): the map for this environment
         :return:
         """
         # Create a map
-        self.map = map
-        self.map.createMap()
+        self.realMap = realMap
         # self.map.generateSubRegion(Settings.SUB_REGION_NUM)  #TODO: add speed for each road
         # self.map.generateMapByDeletion(Settings.DELETE_ROAD_NUM)
 
         # Random generate a goal location
-        self.goalLocation = self.map.randomRoadPoint()
+        self.realMap.setRandomGoalPosition()
+
         print "Goal location: coordinate=", self.goalLocation.coordinates, \
               "roadId=", self.goalLocation.roadId, \
               "intersectionId=", self.goalLocation.intersId
-        self.map.setGoalLocation(self.goalLocation)
+        self.realMap.setGoalLocation(self.goalLocation)
 
         # Initialize the reachGoal flag to False
         self.reachGoal = False
@@ -72,7 +72,7 @@ class Environment(QLEnvironment):
         :return: the time from the original position to the goal state's location
         """
         # TODO: need to replace this method later
-        return self.map.trafficTime(fromPos, self.goalLocation, None)
+        return self.realMap.trafficTime(fromPos, self.goalLocation, None)
 
     def getAction(self, pos):
         """
@@ -80,7 +80,7 @@ class Environment(QLEnvironment):
         :param pos: (x, y) coordinates
         :return: a list of actions
         """
-        return self.map.getAction(pos)
+        return self.realMap.getAction(pos)
 
     def getReward(self, pos, action):
         """
@@ -98,7 +98,7 @@ class Environment(QLEnvironment):
         # TODO: modelizing
         #reward = 0.0
         # =================
-        reward = -1.0 + math.pow(10, -self.map.trafficTime(pos, self.goalLocation, action))
+        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation, action))
         # =================
         return reward
 

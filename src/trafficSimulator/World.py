@@ -13,16 +13,23 @@ class World(object):
     A class that manages the traffic simulator on a map.
     """
 
-    def __init__(self, carNum, taxiNum, shapefile):
-        self.toRemove = []
+    def __init__(self, shapefile):
+        """
+        :param carNum (int): the total number of cars to be added in the map for this experiment
+        :param taxiNum (int): the total number of taxis to be added in the map for this experiment
+        :param shapefile (string): the file name of a shapefile that is going to be used for this experiment
+        """
+        self.realMap = RealMap(shapefile)
+        self.roads = self.realMap.getRoads()
+        self.intersections = self.realMap.getIntersections()
+
         # self.onTick = Traffic.bind(self.onTick, self)  # FIXME
-        self.cars = []
-        self.taxis = []
-        self.roads = None
-        self.intersections = None
-        self.carsNum = carNum
-        self.taxiNum = taxiNum
-        self.map = RealMap(shapefile)
+        self.carsNum = 0
+        self.taxiNum = 0
+        self.cars = None
+        self.taxis = None
+        self.toRemove = []
+
 
     # def instantSpeed(self):
     #     """
@@ -40,8 +47,6 @@ class World(object):
         """
         Create intersection, roads, cars, and taxis
         """
-        self.roads = self.map.roads
-        self.intersections = self.map.intersections
         self.addRandomCar(self.carsNum)
         self.addRandomTaxi(self.taxiNum)
 
@@ -92,26 +97,36 @@ class World(object):
         elif len(self.cars) > TAXI_NUMBER:
             self.removeRandomTaxi(len(self.cars) - TAXI_NUMBER)
 
-    def addRoad(self, road):
-        self.roads.append(road)
-        road.source.roads.push(road)
-        road.target.inRoads.push(road)
-        road.update()
+    # def addRoad(self, road):
+    #     self.roads.append(road)
+    #     road.source.roads.push(road)
+    #     road.target.inRoads.push(road)
+    #     road.update()
+    #
+    # def getRoad(self, id):
+    #     return self.roads.get(id)
 
-    def getRoad(self, id):
-        return self.roads.get(id)
-
-    def addCar(self, car):
-        self.cars.append(car)
+    def addRandomCar(self, num):
+        """
+        Add num random cars in the realMap and set the added cars to self.cars
+        :param num: the number of cars to be added to the realMap
+        """
+        self.realMap.addRandomCars(num)
+        self.cars = self.realMap.getCars()
 
     def getCar(self, id):
         return self.cars.get(id)
 
-    def addTaxi(self, taxi):
-        self.taxis.append(taxi)
+    def addRandomTaxi(self, num):
+        """
+        Add num random taxis in the realMap and set the added cars to self.taxis
+        :param num: the number of taxis to be added to the realMap
+        """
+        self.realMap.addRandomTaxi(num)
+        self.taxis = self.realMap.getTaxis()
 
-    def getTaxi(self, id):
-        return self.taxis.get(id)
+    # def getTaxi(self, id):
+    #     return self.taxis.get(id)
 
     def removeCar(self, car):
         self.toRemove.append(car.id)
@@ -126,30 +141,30 @@ class World(object):
     def getIntersection(self, id):
         return self.intersections.get(id)
 
-    def addRandomCar(self, n):
-        for _ in range(n):
-            road = sample(self.roads)
-            if road:
-                lane = sample(road.lanes)
-                if lane:
-                    self.addCar(Car(50, lane, 0))
-
-    def removeRandomCar(self, n):
-        for _ in range(n):
-            car = sample(self.cars)
-            if car:
-                self.removeCar(car)
-
-    def addRandomTaxi(self, n):
-        for _ in range(n):
-            road = sample(self.roads)
-            if road:
-                lane = sample(road.lanes)
-                if lane:
-                    self.addCar(Taxi(50, lane, 0))
-
-    def removeRandomTaxi(self, n):
-        for _ in range(n):
-            taxi = sample(self.taxis)
-            if taxi:
-                self.removeCar(taxi)
+    # def addRandomCar(self, n):
+    #     for _ in range(n):
+    #         road = sample(self.roads)
+    #         if road:
+    #             lane = sample(road.lanes)
+    #             if lane:
+    #                 self.addCar(Car(50, lane, 0))
+    #
+    # def removeRandomCar(self, n):
+    #     for _ in range(n):
+    #         car = sample(self.cars)
+    #         if car:
+    #             self.removeCar(car)
+    #
+    # def addRandomTaxi(self, n):
+    #     for _ in range(n):
+    #         road = sample(self.roads)
+    #         if road:
+    #             lane = sample(road.lanes)
+    #             if lane:
+    #                 self.addCar(Taxi(50, lane, 0))
+    #
+    # def removeRandomTaxi(self, n):
+    #     for _ in range(n):
+    #         taxi = sample(self.taxis)
+    #         if taxi:
+    #             self.removeCar(taxi)

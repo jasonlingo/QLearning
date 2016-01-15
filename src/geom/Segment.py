@@ -22,7 +22,7 @@ class Segment(object):
         return self.getPoint(0.5)
 
     def split(self, n, reverse):
-        order = None
+        # order = None
         if reverse:
             if n - 1 <= 0:
                 order = [i for i in range(n-1, 1)]  # n-1, n, n+1, ..., 0
@@ -37,6 +37,7 @@ class Segment(object):
         for i in range(len(order)):
             k = order[i]
             result.append(self.subsegment(k / float(n), (k+1) / float(n)))
+            
     def getPoint(self, a):
         result = self.source.add(self.vector().mult(a))
         return result  # FIXME: check the return of self.source.add()

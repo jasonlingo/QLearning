@@ -5,6 +5,7 @@ import os
 from Traffic import RoadType
 from Road import Road
 from Intersection import Intersection
+from Coordinate import Coordinate
 
 
 class Shapefile(object):
@@ -22,10 +23,15 @@ class Shapefile(object):
         self.roads = {}
         self.intersections = {}
 
+        self.top = None
+        self.bot = None
+        self.right = None
+        self.left = None
+
     def getRoads(self):
         """
         Read the shapefile and get all the coordinates of roads.
-        :return:
+        :return: a dictionary containing road data
         """
         if not self.roads:
             self.roads = self.readData(RoadType.ROAD)
@@ -34,7 +40,7 @@ class Shapefile(object):
     def getIntersections(self):
         """
         Read the shapefile and get all the coordinates of intersections.
-        :return: a list of intersection data
+        :return: a dictionary containing intersection data
         """
         if not self.intersections:
             self.intersections = self.readData(RoadType.INTERSECTION)
@@ -49,42 +55,73 @@ class Shapefile(object):
         of the road type.
 
         :param roadType: the given road type.
-        :return: a list of coordinates for the road type.
+        :return: a dictionary of coordinates for the road type.
         """
-        data = []
-        check = []
-        objs = []
+        # For checking correctness
+        # data = []
+        # check = []
+
+        i = 0
+        result = {}
         for sh in self.ctr.iterShapeRecords():
+            i += 1
+            if i > 5000:
+                break
             if sh.record[3] == roadType:
                 lats = [p[1] for p in sh.shape.points]
                 lnts = [p[0] for p in sh.shape.points]
                 centerLats = sum(lats) / float(len(lats)) if len(lats) > 0 else None
                 centerLnts = sum(lnts) / float(len(lnts)) if len(lnts) > 0 else None
-                center = (centerLats, centerLnts)
-                if centerLats and centerLnts:
-                    data.append(center)
+                # center = (centerLats, centerLnts)
+                center = Coordinate(centerLnts, centerLats)
+
+                # For checking correctness
+                # if centerLats and centerLnts:
+                #     data.append(center)
 
                 maxLat, minLat = max(lats), min(lats)
                 maxLnt, minLnt = max(lnts), min(lnts)
-                corners = [tuple([(p[1], p[0]) for p in sh.shape.points if p[1] == maxLat][0])]
-                corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[1] == minLat][0]))
-                corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[0] == maxLnt][0]))
-                corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[0] == minLnt][0]))
-                check.extend(corners)
-                objs.append(self.makeRoads(roadType, corners, center))
+                corners = [Coordinate(p[1], p[0]) for p in sh.shape.points if p[1] == maxLat or\
+                                                                              p[1] == minLat or\
+                                                                              p[0] == maxLnt or\
+                                                                              p[0] == minLnt]
+                if self.top < maxLat:
+                    self.top = maxLat
+                if self.right < maxLnt:
+                    self.right = maxLnt
+                if not self.bot or self.bot > minLat:
+                    self.bot = minLat
+                if not self.left or self.left > minLnt:
+                    self.left = minLnt
+
+                # corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[1] == minLat][0]))
+                # corners.extend(tuple([(p[1], p[0]) for p in sh.shape.points if p[0] == maxLnt][0]))
+                # corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[0] == minLnt][0]))
+
+                # For checking correctness
+                # check.extend(corners)
+
+                rd = self.makeRoads(roadType, corners, center)
+                result[rd.id] = rd
 
         # return data, check
-        return objs
+        return result
 
     def makeRoads(self, roadType, corners, center):
         """
         Create a road or intersection according to the given road type.
+        :param roadType: indicate a road or an intersection to be created
+        :param corners: the corner coordinates of this road or intersection
+        :param center: the center coordinates of this road or intersection
         :return: a created road or intersection
         """
         if roadType == RoadType.ROAD:
             return Road(corners, center, None, None)
         elif roadType == RoadType.INTERSECTION:
-            return Intersection(corners, center, None) # FIXME, rect
+            return Intersection(corners, center, None)  # FIXME, rect
+
+    def getBoard(self):
+        return self.top, self.bot, self.right, self.left
 
     def plotMap(self, intersections, roads, interCheck, roadCheck):
         print "Total points:", len(intersections) + len(roads)
@@ -110,7 +147,9 @@ class Shapefile(object):
         url = "file://" + os.getcwd() + "/" + mapFilename
         webbrowser.open_new(url)
 
-
+# =========================================================
+# For checking the correctness
+# =========================================================
 # sh = Shapefile("/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf")
 # inter, interCheck = sh.getIntersections()
 # roads, roadCheck = sh.getRoads()

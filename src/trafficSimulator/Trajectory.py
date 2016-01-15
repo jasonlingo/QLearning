@@ -7,18 +7,26 @@ class Trajectory(object):
     A class that represents the trajectory of a car.
     """
 
-    def __init__(self, car, lane, position):
+    def __init__(self, car, lane, position=0):
+        """
+        :param car:
+        :param lane:
+        :param position: the distance from the source to the car's locaiton
+        :return:
+        """
         self.car = car
         self.lane = lane
-        if position is None:
-            position = 0
+        self.position = position
+
         self.current = LanePosition(self.car, lane, position)
-        self.current.acquire()
-        self.next = LanePosition(self.car)
-        self.temp = LanePosition(self.car)
+        # self.current.acquire()
+
+        # self.next = LanePosition(self.car)
+        self.temp = LanePosition(self.car, lane, position)
+
         self.isChangingLanes = False
         self.absolutePosition = None
-        self.relativePosition = None
+        # self.relativePosition = None
 
     def getLane(self):
         if self.temp.lane:
@@ -27,25 +35,28 @@ class Trajectory(object):
             return self.current.lane
 
     def getAbsolutePosition(self):
-        if self.temp.lane is not None:
-            return self.temp.position
-        else:
-            return self.current.position
+        # if self.temp.lane is not None:
+        #     return self.temp.position
+        # else:
+        #     return self.current.position
+        return self.current.position
 
     def getRelativePosition(self):
-        return self.absolutePosition / float(self.lane.length)
+        # return self.getAbsolutePosition() / float(self.lane.length)
+        return self.current.position
 
     def getDirection(self):
-        return self.lane.getDirection(self.relativePosition)
+        return self.lane.getDirection(self.getRelativePosition())
 
     def getCoords(self):
-        return self.lane.getPoint(self.relativePosition)
+        return self.lane.getPoint(self.getRelativePosition())
 
     def nextCarDistance(self):
-        if self.current.nextCarDistance().distance < self.next.nextCarDistance().distance:
-            return self.current.nextCarDistance()
-        else:
-            return self.next.nextCarDistance()
+        # if self.current.nextCarDistance().distance < self.next.nextCarDistance().distance:
+        #     return self.current.nextCarDistance()
+        # else:
+        #     return self.next.nextCarDistance()
+        pass
 
     def distanceToStopLine(self):
         if not self.canEnterIntersection():
