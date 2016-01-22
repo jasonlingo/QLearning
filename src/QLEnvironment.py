@@ -42,14 +42,6 @@ class QLEnvironment(object):
         """
         raise NotImplementedError()
 
-    # @abstractmethod
-    # def nextPos(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     raise NotImplementedError()
-
     @abstractmethod
     def setReachGoal(self, newBool):
         """
@@ -59,7 +51,7 @@ class QLEnvironment(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def isGoalReached(self, loc):
+    def isGoalReached(self):
         """
         Return the status of whether the goal has been reached
         :return: a boolean status
@@ -81,5 +73,21 @@ class QLEnvironment(object):
         :param loc: the given location
         :return: True if the given location is reaching the goal position;
                  False otherwise
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def addRandomCars(self, num):
+        """
+        Add num cars at randomly selected locations on the map.
+        :param num: the total number of cars to be added.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def addRandomTaxis(self, num):
+        """
+        Add num taxis at randomly selected locations on the map.
+        :param num: the total number of taxis to be added.
         """
         raise NotImplementedError()

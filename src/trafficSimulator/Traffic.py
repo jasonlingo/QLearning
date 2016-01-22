@@ -1,4 +1,5 @@
-from random import shuffle
+# from random import shuffle, choice
+import random
 from math import radians, cos, sin, asin, sqrt
 from TrafficSettings import *
 from collections import defaultdict
@@ -17,6 +18,7 @@ class RoadType(object):
     ROAD = "Road"
     INTERSECTION = "Intersection"
 
+
 def sample(obj, n):
     """
     return a shuffled sub-list of objects
@@ -24,7 +26,8 @@ def sample(obj, n):
     :param n: the number of samples
     :return: a list of random samples
     """
-    return shuffle(obj)[0:max(0, n)]
+    return shuffle(obj)[:max(0, n)]
+
 
 def shuffle(obj):
     """
@@ -36,8 +39,11 @@ def shuffle(obj):
     :return: a shuffled list
     """
     shuffled = obj[:]
-    shuffle(shuffled)
+    random.shuffle(shuffled)
     return shuffled
+
+def rand(min, max):
+    return random.choice([x for x in range(min, max+1)])
 
 # def each(obj, iterator, context):
 #     """

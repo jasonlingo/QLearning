@@ -6,10 +6,14 @@
 EXP_NUM = 30000
 
 # The total number of taxis in the system
-TAXI_NUM = 20
+TAXI_NUM = 0
 
 # The total number of cars in the system
-CAR_NUM = 100
+CAR_NUM = 2
+
+# The threshold of time (minute) for the system to call a new taxi that
+# might arrive the goal location with shorter time.
+CALL_NEW_TAXI_TIME_GAP = 5
 
 # The filename of the shapefile for the traffic simulator
 SHAPEFILE = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"
@@ -21,8 +25,8 @@ SHAPEFILE = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"
 # Reward for reaching the goal state
 GOAL_REWARD = 1000
 
-# The time lapse for each move. #TODO: check the unit
-UNIT_TIME = 0.05
+# The time lapse (millisecond) for each move. #TODO: check the unit
+TIME_STEP = 30
 
 # The exploration factor
 EPSILON = 0.15

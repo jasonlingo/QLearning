@@ -1,7 +1,8 @@
 import sys
 from QLearning import QLearning
 from Taxi import Taxi
-import matplotlib.pyplot as plt
+from Settings import *
+# import matplotlib.pyplot as plt
 import math
 
 
@@ -14,7 +15,8 @@ class Experiment(object):
         """
         Construct an experiment object that manages all experiment process.
         :param environment: the given environment for performing experiments
-        :param taxiNum: the total number of taxi in the
+        :param taxiNum: the total number of taxis
+        :param carNum: the total number of cars
         :param epsilon: the exploration parameter
         :param alpha: the learning rate
         :param gamma: the discounting factor
@@ -26,9 +28,9 @@ class Experiment(object):
         self.alpha = alpha
         self.gamma = gamma
 
-        self.taxiList = []
-        self.calledTaxi = []
-        self.allTaxis = []
+        self.taxiList = []       # contains non-called taxis
+        self.calledTaxiQL = []   # contains q-learning agents for called taxis
+        self.allTaxis = []       # contains all taxis
 
         # Q value lookup dictionary
         # {((x, y), action): Q value}
@@ -37,36 +39,45 @@ class Experiment(object):
         # Record the visited times for state-action
         self.nsa = {}
 
-        # for the name of plot images
         self.iteration = 0
         self.plotMap = False
 
     def startLearning(self):
         """
-        The Q learning procedure. Stop until one taxi is arrive the goal location.
+        The Q learning procedure. Stop until one taxi arrives the goal location.
+        At the beginning of each learning trial, perform the initialization procedure first.
+        There are two Q-learning procedure: one for learning the routing policy; another for
+        learning the dispatching policy.
         """
         self.initialization()
         self.iteration += 1
-        # print "Goal at: ", self.env.getGoalLocation()
 
         cnt = 0
         while not self.env.isGoalReached():
-            cnt += 1
-            if cnt % 500 == 0:
-                print ".",
-            # call the fastest taxi in every iteration
-            # print "Goal location: ", self.env.getGoalLocation()
+            # cnt += 1
+            # if cnt % 1000 == 0:
+            #     print ".",
+
+            # Change the traffic light first
+            # self.env.changeContralSignal(TIME_STEP)
+
+            # Call the fastest taxi in every iteration. If any non-called taxis
+            # will be faster than the called taxis, the taxi will be returned.
+            # Otherwise, it return None.
             taxi = self.findFastestTaxi()
             if taxi is not None:
                 self.callTaxi(taxi)
 
             # perform Q learning for called taxis
-            for ql in self.calledTaxi:
+            for ql in self.calledTaxiQL:
                 ql.go()
 
             for taxi in self.taxiList:
-                taxi.goRandomly(self.env)
-                taxi.setRandomAvailable()
+                taxi.move(TIME_STEP)
+                # taxi.setRandomAvailable()
+
+            for car in self.env.getCars().values():
+                car.move(TIME_STEP / 1000.0)  # convert millisecond to second
 
             # self.env.map.showMap()
             # plt.plot([self.env.getGoalLocation()[0]], \
@@ -74,7 +85,7 @@ class Experiment(object):
             # for taxi in self.taxiList:
             #     plt.plot([taxi.getPosition()[0]], \
             #              [taxi.getPosition()[1]], 'bo')
-            #
+
             # for ql in self.calledTaxi:
             #     plt.plot([ql.getTaxi().getPosition()[0]], \
             #              [ql.getTaxi().getPosition()[1]], 'yo')
@@ -83,51 +94,64 @@ class Experiment(object):
             # print ""
             # for key in self.qvalue.keys():
             #     print key, ":", self.qvalue[key], " : ", self.nsa[key]
-
+            #
             # if cnt % 50 == 0:
-        # raw_input("next?")
+            #     raw_input("next?")
 
         print "\n arrived !!! at step: ", cnt
 
-        if (self.iteration <= 100 and self.iteration % 10 == 0) or \
-            (self.iteration <= 1000 and self.iteration % 100 == 0) or \
-            (self.iteration % 500 == 0):
-            plt.clf()
-            self.plotMap = False
-            self.outputQvalue()
-            self.outputNSA()
-            self.plotResult(self.iteration)
+        # if (self.iteration <= 100 and self.iteration % 10 == 0) or \
+        #     (self.iteration <= 1000 and self.iteration % 100 == 0) or \
+        #     (self.iteration % 500 == 0):
+        #     plt.clf()
+        #     self.plotMap = False
+        #     self.outputQvalue()
+        #     self.outputNSA()
+        #     self.plotResult(self.iteration)
+        self.setResetFlag(True)  # Tell animated map to wait for the initialization procedure
 
     def initialization(self):
         """
         Initialize taxis, calledTaxi list and the reachGoal flag of the environment.
         """
-        self.taxiList = self.generateTaxi(self.taxiNum)
-        for taxi in self.taxiList:
-            self.allTaxis.append(taxi)
+        self.env.clearCars()
+        self.env.clearTaxis()
+        self.env.addRandomCars(self.carNum)
+        self.env.addRandomTaxis(self.taxiNum)
+
         self.calledTaxi = []
+
         self.env.setReachGoal(False)
+        self.setResetFlag(False)  # Tell the animated map to start plotting cars and taxis
 
-    def plotResult(self, cnt):
-        if not self.plotMap:
-            self.env.map.showMap()
-            self.plotMap = True
+    def setResetFlag(self, b):
+        """
+        Set the reset flag that indicates whether the learning procedure is at the
+        reset step. This is for the animated map to wait for the reset procedure
+        ends.
+        """
+        self.env.setResetFlag(b)
 
-        # plot the route of called taxis
-        for ql in self.calledTaxi:
-            for i in range(len(ql.getTaxi().toGoalRouteX)):
-                r = float(i) / len(ql.getTaxi().toGoalRouteX)
-                plt.plot([ql.getTaxi().toGoalRouteX[i]], [ql.getTaxi().toGoalRouteY[i]], "o", color=(r, 0, 1))
-            for i in range(len(ql.getTaxi().randomRouteX)):
-                plt.plot([ql.getTaxi().randomRouteX[i]], [ql.getTaxi().randomRouteY[i]], "o", color='y')
-
-        # plot the route for other taxis that are not been called
-        # for taxi in self.taxiList:
-        #     plt.plot(taxi.randomRouteX, taxi.randomRouteY, "o", color='lightgrey')
-
-        plt.plot([self.env.getGoalLocation()[0]], [self.env.getGoalLocation()[1]], 'ro')
-        plt.title("No."+str(self.iteration)+" trial")
-        plt.savefig('result/pic/Trial_'+str(cnt)+'.png')
+    # def plotResult(self, cnt):
+    #     if not self.plotMap:
+    #         self.env.map.showMap()
+    #         self.plotMap = True
+    #
+    #     # plot the route of called taxis
+    #     for ql in self.calledTaxiQL:
+    #         for i in range(len(ql.getTaxi().toGoalRouteX)):
+    #             r = float(i) / len(ql.getTaxi().toGoalRouteX)
+    #             plt.plot([ql.getTaxi().toGoalRouteX[i]], [ql.getTaxi().toGoalRouteY[i]], "o", color=(r, 0, 1))
+    #         for i in range(len(ql.getTaxi().randomRouteX)):
+    #             plt.plot([ql.getTaxi().randomRouteX[i]], [ql.getTaxi().randomRouteY[i]], "o", color='y')
+    #
+    #     # plot the route for other taxis that are not been called
+    #     # for taxi in self.taxiList:
+    #     #     plt.plot(taxi.randomRouteX, taxi.randomRouteY, "o", color='lightgrey')
+    #
+    #     plt.plot([self.env.getGoalLocation()[0]], [self.env.getGoalLocation()[1]], 'ro')
+    #     plt.title("No."+str(self.iteration)+" trial")
+    #     plt.savefig('result/pic/Trial_'+str(cnt)+'.png')
 
     def outputQvalue(self):
         if not self.plotMap:
@@ -158,40 +182,24 @@ class Experiment(object):
         fastestTaxi = None
         shortestTime = sys.maxint
 
-        # find the shortest time for the called taxis to the goal location
-        # print "taxis not available=========="
-        # for taxi in self.taxiList:
-        #     if not taxi.isAvailable():
-        #         print "Taxi no." + str(taxi.getId()) + " is not available."
-        #         print "Location: ", taxi.getPosition()
-        #         print ""
-
-        # print "called taxis================="
-        for ql in self.calledTaxi:
+        for ql in self.calledTaxiQL:
             time = self.env.timeToGoalState(ql.getTaxi().getPosition())
-            # print "Taxi no." + str(ql.getTaxi().getId()) + " => " + str(time)
-            # print "Location: ", ql.getTaxi().getPosition()
-            # print ""
             if time < shortestTime:
                 shortestTime = time
 
-        # print "not called taxis============="
-        # find the taxi with shorter time than the called taxis to the goal location
-        for taxi in self.taxiList:
-            if taxi.isAvailable():
-                taxi.setAvailable(False)  # lock this taxi first
-                time = self.env.timeToGoalState(taxi.getPosition())
-                # print "Taxi no." + str(taxi.getId()) + " => " + str(time)
-                # print "Location: ", taxi.getPosition()
-                # print ""
-                if time < shortestTime:
-                    if fastestTaxi is not None:
-                        fastestTaxi.setAvailable(True)  # unlock the previous fastest taxi
-                    fastestTaxi = taxi
-                    shortestTime = time
-                else:
-                    taxi.setAvailable(True)  # unlock this taxi
-
+        # Find the taxi with shorter time than the called taxis to the goal location.
+        # By certain minutes shorter do we consider it is quicker than the called taxis to the goal location.
+        # for taxi in self.env.getTaxis().values():
+        #     if taxi.isAvailable():
+        #         taxi.setAvailable(False)  # lock this taxi first
+        #         time = self.env.timeToGoalState(taxi.getPosition())
+        #         if time < shortestTime:
+        #             if fastestTaxi is not None:
+        #                 fastestTaxi.setAvailable(True)  # unlock the previous fastest taxi
+        #             fastestTaxi = taxi
+        #             shortestTime = time
+        #         else:
+        #             taxi.setAvailable(True)  # unlock this taxi
         return fastestTaxi
 
     def callTaxi(self, taxi):
@@ -201,7 +209,7 @@ class Experiment(object):
         """
         taxi.beenCalled()
         ql = QLearning(taxi, self.env, self.qvalue, self.nsa, self.getEpsilon())
-        self.calledTaxi.append(ql)
+        self.calledTaxiQL.append(ql)
         self.taxiList.remove(taxi)
 
         # print "call taxi no." + str(taxi.getId())
@@ -213,17 +221,19 @@ class Experiment(object):
         """
         return max(0.05, self.epsilon * math.pow(0.9999, self.iteration))
 
-    def generateTaxi(self, taxiNum):
+    def addCarTaxi(self):
         """
         Generate taxis with random initial locations
         :param taxiNum: the total number of taxis to be generated
         :return: the list of generated taxis
         """
-        taxis = []
-        for i in range(taxiNum):
-            x, y = self.env.randomLocation()
-            taxis.append(Taxi(i, x, y))
-        return taxis
+        # taxis = []
+        # for i in range(taxiNum):
+        #     x, y = self.env.randomLocation()
+        #     taxis.append(Taxi(i, x, y))
+        # return taxis
+        self.env.addRandomCars(self.carNum)
+        self.env.addRandomTaxis(self.taxiNum)
 
     def printQValue(self):
         print "Final Q values======================================"

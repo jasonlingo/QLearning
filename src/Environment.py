@@ -1,8 +1,6 @@
-import random
 import math
 from trafficSimulator.RealMap import RealMap
 from QLEnvironment import QLEnvironment
-from Settings import *
 
 
 class Environment(QLEnvironment):
@@ -16,54 +14,27 @@ class Environment(QLEnvironment):
         :param realMap (RealMap): the map for this environment
         :return:
         """
-        # Create a map
         self.realMap = realMap
-        # self.map.generateSubRegion(Settings.SUB_REGION_NUM)  #TODO: add speed for each road
+
+        # TODO: add speed for each road
+        # self.map.generateSubRegion(Settings.SUB_REGION_NUM)
         # self.map.generateMapByDeletion(Settings.DELETE_ROAD_NUM)
 
-        # Random generate a goal location
-        self.realMap.setRandomGoalPosition()
+        # print "Goal location: coordinate=", self.goalLocation.coordinates, \
+        #       "roadId=", self.goalLocation.roadId, \
+        #       "intersectionId=", self.goalLocation.intersId
 
-        print "Goal location: coordinate=", self.goalLocation.coordinates, \
-              "roadId=", self.goalLocation.roadId, \
-              "intersectionId=", self.goalLocation.intersId
-        self.realMap.setGoalLocation(self.goalLocation)
-
-        # Initialize the reachGoal flag to False
+        self.goalLocation = self.realMap.getGoalLanePosition()
         self.reachGoal = False
+        self.cars = {}
+        self.taxis = {}
 
-    # def randomLocation(self, floatNum=5):
-    #     """
-    #     Generate random location for taxi
-    #     Args:
-    #       floatNum: The number of digits to the right of the decimal point
-    #     """
-    #     # TODO: need change
-    #     power = math.pow(10, floatNum)
-    #     while True:
-    #         x = random.randrange(self.right)
-    #         y = random.randrange(self.top)
-    #
-    #         if self.map.checkRoadPoint(x, y):
-    #             roadChoice = []
-    #             if self.map.checkRoadPoint(x+1, y):
-    #                 roadChoice.append((x+1, y))
-    #             if self.map.checkRoadPoint(x-1, y):
-    #                 roadChoice.append((x-1, y))
-    #             if self.map.checkRoadPoint(x, y+1):
-    #                 roadChoice.append((x, y+1))
-    #             if self.map.checkRoadPoint(x, y-1):
-    #                 roadChoice.append((x, y-1))
-    #
-    #             if roadChoice:
-    #                 road = random.choice(roadChoice)
-    #                 posX = x
-    #                 posY = y
-    #                 if x != road[0]:
-    #                     posX = random.randrange(min(x, road[0]) * power, (max(x, road[0])) * power) / power
-    #                 if y != road[1]:
-    #                     posY = random.randrange(min(y, road[1]) * power, (max(y, road[1])) * power) / power
-    #                 return posX, posY
+    def randomLocation(self):
+        """
+        Randomly select one land from a randomly selected road and position (0~1).
+        :return: the selected lane and position.
+        """
+        return self.realMap.randomLaneLocation()
 
     def timeToGoalState(self, fromPos):
         """
@@ -77,7 +48,7 @@ class Environment(QLEnvironment):
     def getAction(self, pos):
         """
         Get the available actions for the given position.
-        :param pos: (x, y) coordinates
+        :param pos: lane, position
         :return: a list of actions
         """
         return self.realMap.getAction(pos)
@@ -142,10 +113,22 @@ class Environment(QLEnvironment):
     #         print "wrong coordinate: ", num
     #     return num
 
+    def setReachGoal(self, newBool):
+        self.reachGoal = newBool
+
+    def isGoalReached(self):
+        return self.reachGoal
+
+    def getGoalLocation(self):
+        """
+        :return: a Trajectory object containing the lane and position of the goal location
+        """
+        return self.goalLocation
+
     def checkArriveGoal(self, pos):
         """
-        Check the position is reaching the goal position. If the given position is within the goal +/- 0.2 unit distance,
-        then it reaches the goal location.
+        Check whether the position reaches the goal position. If the given position is
+        within the goal +/- 0.2 unit distance, then it reaches the goal location.
         Args:
             pos: the given position
         Returns:
@@ -157,3 +140,30 @@ class Environment(QLEnvironment):
         else:
             return False
 
+    def addRandomCars(self, num):
+        self.realMap.addRandomCars(num)
+        self.cars = self.realMap.getCars()
+
+    def addRandomTaxis(self, num):
+        self.realMap.addRandomTaxi(num)
+        self.taxis = self.realMap.getTaxis()
+
+    def clearCars(self):
+        self.realMap.clearCars()
+        self.cars = None
+
+    def clearTaxis(self):
+        self.realMap.clearTaxis()
+        self.taxis = None
+
+    def getCars(self):
+        return self.cars
+
+    def getTaxis(self):
+        return self.taxis
+
+    def setResetFlag(self, b):
+        self.realMap.setResetFlag(b)
+
+    def changeContralSignal(self, delta):
+        self.realMap.changeContralSignal(delta)

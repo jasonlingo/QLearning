@@ -45,10 +45,10 @@ class Intersection(object):
     def getId(self):
         return self.id
 
-    def getRoad(self):
+    def getRoads(self):
         return self.roads
 
-    def getInRoad(self):
+    def getInRoads(self):
         return self.inRoads
 
     def addRoad(self, rd):

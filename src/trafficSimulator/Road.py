@@ -32,8 +32,10 @@ class Road(object):
         self.setLength()
         self.targetSide = None
         self.sourceSide = None
-        self.targetSideId = None
-        self.sourceSideId = None
+        # self.targetSideId = None
+        # self.sourceSideId = None
+        self.targetSideId = 0 #fixme
+        self.sourceSideId = 0
         self.update()
 
     def parseCorners(self, corners):
@@ -103,11 +105,25 @@ class Road(object):
         if self.length:
             return self.length
 
+    def getTurnDirection(self, other):
+        """
+        Calculate the turn number based on the current intersection and the given "other" intersection.
+        :param other:
+        :return:
+        """
+        # print other
+        if self.target != other.source:
+            print "invalid roads"
+            return
+        # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4 #FIXME
+
+        return 0
+
     def update(self):
         if not self.source or not self.target:
             # print "incomplete road"
             return
-
+        # ToDo: check
         # self.sourceSideId = self.source.rect.getSectorId(self.target.rect.center())
         # self.sourceSide = self.source.rect.getSide(self.sourceSideId).subsegment(0.5, 1.0)
         # self.targetSideId = self.target.rect.getSectorId(self.source.rect.center())
@@ -116,7 +132,7 @@ class Road(object):
         # self.lanesNumber = max(2, float(self.lanesNumber) / Traffic.settings.gridSize)
         # sourceSplits = self.sourceSide.split(self.lanesNumber, True)
         # targetSplits = self.targetSide.split(self.lanesNumber)
-        # if self.lanes is None or self.lanes.length < self.lanesNumber:
+        # if self.lanes is None or len(self.lanes) < self.lanesNumber:
         #     if self.lanes is None:
         #         self.lanes = []
         #     for i in range(self.lanesNumber):
@@ -131,6 +147,6 @@ class Road(object):
         #     self.lanes[i].rightAdjacent = self.lanes[i - 1]
         #     self.lanes[i].leftmostAdjacent = self.lanes[self.lanesNumber - 1]
         #     self.lanes[i].rightmostAdjacent = self.lanes[0]
-        #     # results.append(self.lanes[i].update())
-        # # return results
+            # results.append(self.lanes[i].update())
+        # return results
         self.lanes.append(Lane(self))

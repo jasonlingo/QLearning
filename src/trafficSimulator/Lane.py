@@ -52,7 +52,7 @@ class Lane(object):
     #     self.direction = self.middleLine.direction
 
     def getTurnDirection(self, other):
-        return self.road.getTurnDirection(other.road)
+        return self.road.getTurnDirection(other.road)  # it now only returns 0
 
     def getDirection(self):
         return self.direction
@@ -65,12 +65,17 @@ class Lane(object):
         """
         lng = self.source.center.lng + (self.target.center.lng - self.source.center.lng) * a
         lat = self.source.center.lat + (self.target.center.lat - self.source.center.lat) * a
-        return lng, lat
+        return min(self.target.center.lng, lng), min(self.target.center.lat, lat)
 
     def addCarPosition(self, carPos):
+        """
+        Add the given carPos (LanePosition) to the self.carsPosition dictionary
+        :param carPos: (LanePosition)
+        """
         if carPos.id in self.carsPosition:
             print "car is already here"
-        self.carsPosition[carPos.id] = carPos
+        else:
+            self.carsPosition[carPos.id] = carPos
 
     def removeCar(self, carPos):
         if carPos.id not in self.carsPosition:
@@ -78,14 +83,22 @@ class Lane(object):
         del self.carsPosition[carPos.id]
 
     def getNext(self, carPos):
+        """
+        Find the car in front of the given parameter "carPos".
+        :param carPos: a LanePosition of a car
+        :return: the front car's LanePositions
+        """
         if carPos.lane != self:
             print "car is on other lane"
+            return
         next = None
-        bestDistance = sys.maxint
+        shortestDist = sys.maxint
         for car in self.carsPosition.itervalues():
+            if car.position is None:
+                print "the car has no position"
             distance = car.position - carPos.position
-            if not car.free and (0 < distance < bestDistance):
-                bestDistance = distance
+            if not car.free and (0 < distance < shortestDist):
+                shortestDist = distance
                 next = car
         return next
 

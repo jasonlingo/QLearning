@@ -60,12 +60,14 @@ class Shapefile(object):
         # For checking correctness
         # data = []
         # check = []
-
+        print "Loading", roadType,
         i = 0
         result = {}
         for sh in self.ctr.iterShapeRecords():
             i += 1
-            if i > 5000:
+            if i % 10000 == 0:
+                print ".",
+            if i > 4000:
                 break
             if sh.record[3] == roadType:
                 lats = [p[1] for p in sh.shape.points]
@@ -79,6 +81,7 @@ class Shapefile(object):
                 # if centerLats and centerLnts:
                 #     data.append(center)
 
+                # Find the top, bottom, right, and left of this map
                 maxLat, minLat = max(lats), min(lats)
                 maxLnt, minLnt = max(lnts), min(lnts)
                 corners = [Coordinate(p[1], p[0]) for p in sh.shape.points if p[1] == maxLat or\
@@ -103,8 +106,8 @@ class Shapefile(object):
 
                 rd = self.makeRoads(roadType, corners, center)
                 result[rd.id] = rd
-
         # return data, check
+        print ""
         return result
 
     def makeRoads(self, roadType, corners, center):

@@ -14,4 +14,4 @@ LIGHT_FLIP_INTERVAL = 20
 CARS_NUMBER = 100
 TAXI_NUMBER = 20
 SHAPEFILE_NAME = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"
-MAX_SPEED = 40
+MAX_SPEED = 40.0

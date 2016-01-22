@@ -7,12 +7,19 @@ class LanePosition(object):
     A class that represents the position of a car on a lane.
     """
 
-    def __init__(self, car, lane, position):
+    def __init__(self, car, lane=None, position=0):
         self.car = car
         self.lane = lane
         self.position = position
         self.id = Traffic.uniqueId("laneposition")
         self.free = True
+        self.isGoalFlag = False
+
+    def setGoal(self):
+        self.isGoalFlag = True
+
+    def isGoal(self):
+        return self.isGoalFlag
 
     def getLane(self):
         return self.lane
@@ -24,9 +31,9 @@ class LanePosition(object):
         return self.position / float(self.lane.length)
 
     def nextCarDistance(self):
-        next = self.getNext()
+        next = self.getNext()  # this method return a LanePosition
         if next:
-            rearPosition = next.position - next.car.length / 2.0
+            rearPosition = next.position - (next.car.length / 2.0 if next.car else 0)  # the next.car might be the crash's location and will be None
             frontPosition = self.position + self.car.length / 2.0
             return next.car, rearPosition - frontPosition
         return None, sys.maxint
@@ -34,7 +41,8 @@ class LanePosition(object):
     def acquire(self):
         if self.lane:
             self.free = False
-            return self.lane.addCarPosition(self)
+            self.lane.addCarPosition(self)
+
 
     def release(self):
         if not self.free and self.lane:
@@ -42,6 +50,10 @@ class LanePosition(object):
             self.lane.removeCar(self)
 
     def getNext(self):
+        """
+        Get the front car of this current car
+        :return: the front car's LanePosition
+        """
         if self.lane and not self.free:
             return self.lane.getNext(self)
 
