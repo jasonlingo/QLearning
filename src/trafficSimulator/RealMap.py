@@ -23,8 +23,8 @@ class RealMap(object):
         """
 
         self.she = Shapefile(shapefileName)
-        self.roads = self.she.getRoads()
-        self.intersections = self.she.getIntersections()
+        self.roads = {}
+        self.intersections = {}
         self.createMap()
         self.board = self.she.getBoard()  #[top, bot, right, left] of this map
 
@@ -35,45 +35,59 @@ class RealMap(object):
         self.reset = False
         self.locDict = defaultdict(list)
         self.aniMapPlotOK = False
+        self.carRunsOk = False
 
     def createMap(self):
         """
         Connect intersections with roads. Assume every road has two directions.
         """
-        print "creating map",
+        print "creating map"
 
         i = 0
         start_time = time.time()  # for computing the execution time
-        for inter in self.intersections.values():
-            for rd in self.roads.values():
+        for inter in self.she.getIntersections().values():
+            for rd in self.she.getRoads().values():
+                # =========================
+                # only for the purpose of viewing progress
                 i += 1
                 if i % 1000000 == 0:
                     print ".",
                     if i % 50000000 == 0:
                         print ""
+                # =========================
 
                 if rd.isConnected(inter):
                     if not rd.getSource():
                         rd.setSource(inter)  # FIXME: reduce some distance for intersection?
-                        inter.addRoad(rd)
+                        # inter.addRoad(rd)
                     elif not rd.getTarget():
                         rd.setTarget(inter)
                         inter.addInRoad(rd)
+                        self.roads[rd.id] = rd
+                        sourceInter = rd.getSource()
+                        sourceInter.addRoad(rd)
                         # add a road for opposite direction
                         opRd = Road(rd.corners, rd.center, rd.getTarget(), rd.getSource())
                         inter.addRoad(opRd)
                         rd.getSource().addInRoad(opRd)
                         self.roads[opRd.id] = opRd
+            if inter.getRoads() and inter.getInRoads():
+                self.intersections[inter.id] = inter
+
+        # examine map
         print ""
+        print "total road:", len(self.roads), "; total intersection:", len(self.intersections)
+        print "checking map"
+
+        # removing unwanted roads and intersections
         removeRoads = []
         removeInters = []
-
         for inter in self.intersections.values():
             if len(inter.getInRoads()) == 0 or len(inter.getRoads()) == 0:
                 removeInters.append(inter)
 
         for rd in self.roads.values():
-            if not rd.getSource() or not rd.getTarget():
+            if not rd.getSource() or not rd.getTarget() or not rd.lanes:
                 removeRoads.append(rd)
 
         print "remove", len(removeRoads), "roads and", len(removeInters), "intersections"
@@ -82,23 +96,29 @@ class RealMap(object):
         for rd in removeRoads:
             del self.roads[rd.id]
 
-        print (time.time() - start_time), " seconds"
-
-        print "checking map"
+        # checking map
         for road in self.roads.values():
-            if road.getTarget() and road.getSource():
-                if len(road.lanes) == 0:
-                    print "road error, no lane on a road"
+            if not road.getTarget() or not road.getSource():
+                print "Eff: incomplete road"
+            if not road.lanes:
+                print "Err: no lane on a road"
         for inter in self.intersections.values():
             if len(inter.getRoads()) == 0:
-                print "intersection has no road"
-        print "end checking"
-
+                print "Err: intersection has no road"
+            for rd in inter.getRoads():
+                if not rd.lanes:
+                    print "Eff: road", rd.id, "has no lane"
+        print "checking ends"
+        print "using", (time.time() - start_time), "seconds"
 
     def getRoads(self):
+        if not self.roads:
+            self.createMap()
         return self.roads
 
     def getIntersections(self):
+        if not self.intersections:
+            self.createMap()
         return self.intersections
 
     def getBoard(self):
@@ -206,6 +226,12 @@ class RealMap(object):
 
     def isAniMapPlotOk(self):
         return self.aniMapPlotOK
+
+    def setCarRunsOK(self, b):
+        self.carRunsOk = b
+
+    def isCarRunsOk(self):
+        return self.carRunsOk
 
     def changeContralSignal(self, delta):
         for inter in self.intersections.values():

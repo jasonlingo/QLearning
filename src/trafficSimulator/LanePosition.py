@@ -43,7 +43,6 @@ class LanePosition(object):
             self.free = False
             self.lane.addCarPosition(self)
 
-
     def release(self):
         if not self.free and self.lane:
             self.free = True

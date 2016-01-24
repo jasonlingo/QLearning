@@ -9,7 +9,7 @@ EXP_NUM = 30000
 TAXI_NUM = 0
 
 # The total number of cars in the system
-CAR_NUM = 2
+CAR_NUM = 20
 
 # The threshold of time (minute) for the system to call a new taxi that
 # might arrive the goal location with shorter time.
@@ -26,7 +26,7 @@ SHAPEFILE = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"
 GOAL_REWARD = 1000
 
 # The time lapse (millisecond) for each move. #TODO: check the unit
-TIME_STEP = 30
+TIME_STEP = 100
 
 # The exploration factor
 EPSILON = 0.15

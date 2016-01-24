@@ -167,3 +167,9 @@ class Environment(QLEnvironment):
 
     def changeContralSignal(self, delta):
         self.realMap.changeContralSignal(delta)
+
+    def setCarRunsOK(self, b):
+        self.realMap.setCarRunsOK(b)
+
+    def isAniMapPlotOk(self):
+        return self.realMap.isAniMapPlotOk()

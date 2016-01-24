@@ -14,7 +14,7 @@ if __name__ == '__main__':
         Perform the learning process for EXP_NUM trials.
         """
         while not realMap.isAniMapPlotOk():
-            time.sleep(2)
+            time.sleep(1)
         for i in range(EXP_NUM):
             print "========== " + str(i+1) + "-th trial =========="
             exp.startLearning()

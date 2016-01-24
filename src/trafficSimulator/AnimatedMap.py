@@ -7,6 +7,7 @@ from RealMap import RealMap
 from Car import *
 import threading
 import Tkinter as tk
+from TrafficSettings import *
 
 class AnimatedMap(threading.Thread):
     """
@@ -93,7 +94,7 @@ class AnimatedMap(threading.Thread):
             self.calledTaxiPoints.set_data([taxi.getCoords()[0] for taxi in taxis if taxi.called], [taxi.getCoords()[1] for taxi in taxis if taxi.called])
             self.taxiPoints.set_data([taxi.getCoords()[0] for taxi in taxis if not taxi.called], [taxi.getCoords()[1] for taxi in taxis if not taxi.called])
 
-        ani = animation.FuncAnimation(fig, animate, init_func=init, interval=30, blit=False)
+        ani = animation.FuncAnimation(fig, animate, init_func=init, interval=25, blit=False)
         plt.show()
 
 

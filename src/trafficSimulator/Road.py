@@ -107,21 +107,19 @@ class Road(object):
 
     def getTurnDirection(self, other):
         """
-        Calculate the turn number based on the current intersection and the given "other" intersection.
-        :param other:
-        :return:
+        Each road has only one lane for now. So it returns 0.
+        :param other: the next road
+        :return: the turn number
         """
-        # print other
         if self.target != other.source:
             print "invalid roads"
             return
-        # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4 #FIXME
+        # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4 #FIXME: this is the original version
 
-        return 0
+        return random.choice([x for x in range(len(other.lanes))])
 
     def update(self):
         if not self.source or not self.target:
-            # print "incomplete road"
             return
         # ToDo: check
         # self.sourceSideId = self.source.rect.getSectorId(self.target.rect.center())
@@ -149,4 +147,5 @@ class Road(object):
         #     self.lanes[i].rightmostAdjacent = self.lanes[0]
             # results.append(self.lanes[i].update())
         # return results
-        self.lanes.append(Lane(self))
+        if not self.lanes:
+            self.lanes.append(Lane(self))

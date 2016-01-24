@@ -26,7 +26,7 @@ class Trajectory(object):
         # self.next = LanePosition(self.car, lane, position)
         self.next = LanePosition(self.car)
         # self.temp = LanePosition(self.car, lane, position)
-        self.temp = LanePosition(self.car)
+        # self.temp = LanePosition(self.car)
 
         self.isChangingLanes = False
         self.absolutePosition = None
@@ -39,39 +39,39 @@ class Trajectory(object):
         return self.current.isGoal()
 
     def getLane(self):
-        if self.temp.lane:
-            return self.temp.lane
-        else:
-            return self.current.lane
+        # if self.temp.lane:
+        #     return self.temp.lane
+        # else:
+        return self.current.lane
 
     def getAbsolutePosition(self):
-        if self.temp.lane:
-            return self.temp.position
-        else:
-            return self.current.position
+        # if self.temp.lane:
+        #     return self.temp.position
+        # else:
+        return self.current.position
         # return self.current.position
 
     def getRelativePosition(self):
-        if self.temp.lane:
-            return self.getAbsolutePosition() / self.temp.lane.length
-        else:
-            return self.getAbsolutePosition() / self.current.lane.length
+        # if self.temp.lane:
+        #     return self.getAbsolutePosition() / self.temp.lane.length
+        # else:
+        return self.getAbsolutePosition() / self.current.lane.length
 
         # return self.getAbsolutePosition() / (float(self.temp.lane.length) if self.temp.lane else float(self.current.lane.length)
         # return self.current.position
 
     def getDirection(self):
-        if self.temp.lane:
-            return self.temp.lane.getDirection(self.getRelativePosition())
-        else:
-            return self.current.lane.getDirection(self.getRelativePosition())
+        # if self.temp.lane:
+        #     return self.temp.lane.getDirection(self.getRelativePosition())
+        # else:
+        return self.current.lane.getDirection(self.getRelativePosition())
         # return self.lane.getDirection(self.getRelativePosition())
 
     def getCoords(self):
-        if self.temp.lane:
-            return self.temp.lane.getPoint(self.getRelativePosition())
-        else:
-            return self.current.lane.getPoint(self.getRelativePosition())
+        # if self.temp.lane:
+        #     return self.temp.lane.getPoint(self.getRelativePosition())
+        # else:
+        return self.current.lane.getPoint(self.getRelativePosition())
         # return self.lane.getPoint(self.getRelativePosition())
 
     def nextCarDistance(self):
@@ -113,7 +113,7 @@ class Trajectory(object):
 
     def canEnterIntersection(self):
         """
-        Determine whether this car can pass the intersection by checking the traffic light.
+        Determine whether this car can go through the intersection by checking the traffic light of it.
         :return:
         """
         nextLane = self.car.nextLane
@@ -121,10 +121,10 @@ class Trajectory(object):
         if not nextLane:
             return True
         intersection = self.nextIntersection()
-        turnNumber = sourceLane.getTurnDirection(nextLane)  # FIXME: now always returns 0
-        sideId = sourceLane.road.targetSideId  # FIXME: now always returns 0
-        # print "sideId:", sideId, ", turnNumber:", turnNumber
-        # return intersection.controlSignals.states[sideId][turnNumber]  # FIXME
+        # turnNumber = sourceLane.getTurnDirection(nextLane)
+        # sideId = sourceLane.road.targetSideId
+        # sideId = sourceLane.getSideId()
+        # return intersection.controlSignals.states[sideId][turnNumber]
         return True
 
     def getDistanceToIntersection(self):
@@ -158,7 +158,7 @@ class Trajectory(object):
         distance = max(distance, 0)
         self.current.position += distance
         self.next.position += distance
-        self.temp.position += distance
+        # self.temp.position += distance
         if self.timeToMakeTurn() and self.canEnterIntersection() and self.isValidTurn():
             self.startChangingLanes(self.car.popNextLane(), distance)
 
@@ -225,11 +225,12 @@ class Trajectory(object):
             nextPosition = self.current.position - self.current.lane.length
         else:
             nextPosition = 0
+        nextPosition = 0
 
         self.next.lane = nextLane
-        self.temp.lane = nextLane
-        self.next.position = nextPosition
-        self.temp.position = nextPosition
+        # self.temp.lane = nextLane
+        self.next.position = nextPosition if nextPosition < self.next.lane.length else 0
+        # self.temp.position = nextPosition
 
         # self.next.lane = nextLane
         # self.next.position = nextPosition
@@ -243,14 +244,14 @@ class Trajectory(object):
         if not self.isChangingLanes:
             print "no lane changing is going on"
         self.next.release()
-        self.temp.release()
+        # self.temp.release()
         self.isChangingLanes = False
         self.current.lane = self.next.lane
         self.current.position = self.next.position
         self.next.lane = None
         self.next.position = 0
-        self.temp.lane = None
-        self.temp.position = 0
+        # self.temp.lane = None
+        # self.temp.position = 0
         self.current.acquire()
         # return self.current.lane
 
@@ -259,4 +260,4 @@ class Trajectory(object):
             self.current.release()
         if self.next:
             self.next.release()
-        self.temp.release()
+        # self.temp.release()

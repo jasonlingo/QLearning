@@ -31,6 +31,9 @@ class Lane(object):
     def getTargetSideId(self):
         return self.road.targetSideId
 
+    def getSideId(self):
+        roads = self.road
+
     def getRoadId(self):
         return self.road.id
 
@@ -63,9 +66,9 @@ class Lane(object):
         :param a: the relative position from 0(source) to 1(target)
         :return: (longitude, latitude)
         """
-        lng = self.source.center.lng + (self.target.center.lng - self.source.center.lng) * a
-        lat = self.source.center.lat + (self.target.center.lat - self.source.center.lat) * a
-        return min(self.target.center.lng, lng), min(self.target.center.lat, lat)
+        lng = self.source.center.lng + (self.target.center.lng - self.source.center.lng) * min(a, 1)
+        lat = self.source.center.lat + (self.target.center.lat - self.source.center.lat) * min(a, 1)
+        return lng, lat
 
     def addCarPosition(self, carPos):
         """

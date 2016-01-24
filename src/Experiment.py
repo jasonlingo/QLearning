@@ -4,7 +4,8 @@ from Taxi import Taxi
 from Settings import *
 # import matplotlib.pyplot as plt
 import math
-
+import time
+from trafficSimulator.TrafficSettings import *
 
 class Experiment(object):
     """
@@ -51,8 +52,8 @@ class Experiment(object):
         """
         self.initialization()
         self.iteration += 1
-
         cnt = 0
+        preTime = time.time()
         while not self.env.isGoalReached():
             # cnt += 1
             # if cnt % 1000 == 0:
@@ -76,8 +77,15 @@ class Experiment(object):
                 taxi.move(TIME_STEP)
                 # taxi.setRandomAvailable()
 
+            interval = time.time() - preTime
+            preTime = time.time()
+            # print "interval:", interval
             for car in self.env.getCars().values():
-                car.move(TIME_STEP / 1000.0)  # convert millisecond to second
+                car.move(interval)  # convert millisecond to second
+                # period = (time.time() - start_time)
+                # print "car move uses", (time.time() - start_time), "seconds"
+                # while (time.time() - start_time) * 1000 < ANIMATION_LAPSE:
+                #     print ".",
 
             # self.env.map.showMap()
             # plt.plot([self.env.getGoalLocation()[0]], \
