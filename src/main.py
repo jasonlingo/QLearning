@@ -1,30 +1,42 @@
 from Environment import Environment
 from Experiment import Experiment
-from Action import Action
-import Settings
+from Settings import *
+from trafficSimulator.RealMap import RealMap
+from trafficSimulator.AnimatedMap import AnimatedMap
+import threading
+import matplotlib.pyplot as plt
+import time
+
 
 if __name__ == '__main__':
+    def runExp():
+        """
+        Perform the learning process for EXP_NUM trials.
+        """
+        while not realMap.isAniMapPlotOk():
+            time.sleep(1)
+        for i in range(EXP_NUM):
+            print "========== " + str(i+1) + "-th trial =========="
+            exp.startLearning()
 
-    # ========================================================================
-    # Initialize training environment
-    # ========================================================================
-    # Create an environment object
-    # actions = [Action.NORTH, Action.SOUTH, Action.EAST, Action.WEST]
-    actions = Action.getActions()
-    env = Environment(actions, Settings.ENV_BOTTOM, Settings.ENV_TOP, Settings.ENV_LEFT, Settings.ENV_RIGHT)
+        # Print the results
+        # experiment.printQValue()
+        # experiment.printNSA()
+        # experiment.showMap()
 
-    # create a learning agent
-    exp = Experiment(env, Settings.TAXI_NUM, epsilon=Settings.EPSILON)
+    # Create a RealMap object and pass it to a Environment object.
+    # Start a new thread that runs the learning process.
+    realMap = RealMap(SHAPEFILE)
+    env = Environment(realMap)
+    exp = Experiment(env, TAXI_NUM, CAR_NUM, epsilon=EPSILON, alpha=ALPHA, gamma=GAMMA)
+    # runExp()
+    t = threading.Thread(target=runExp)
+    t.start()
 
+    # plot the animated map
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.set_aspect(1.0)
+    aniMap = AnimatedMap(realMap)
+    aniMap.plotAnimatedMap(fig, ax)
 
-    # ========================================================================
-    # Start the learning process
-    # ========================================================================
-
-    for i in range(Settings.EXP_NUM):
-        print "========== " + str(i+1) + "-th trial =========="
-        exp.startLearning()
-
-    # experiment.printQValue()
-    # experiment.printNSA()
-    # experiment.showMap()
+    print "Experiments end"

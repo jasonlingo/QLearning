@@ -7,7 +7,7 @@ import sys
 import Settings
 
 
-class Map:
+class Map(object):
     """
     A class that represents a map.
     """
