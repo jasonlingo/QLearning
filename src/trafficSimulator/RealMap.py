@@ -59,20 +59,32 @@ class RealMap(object):
                 if rd.isConnected(inter):
                     if not rd.getSource():
                         rd.setSource(inter)  # FIXME: reduce some distance for intersection?
-                        # inter.addRoad(rd)
                     elif not rd.getTarget():
                         rd.setTarget(inter)
+                        # print "target inter add in rd", rd.id
                         inter.addInRoad(rd)
                         self.roads[rd.id] = rd
                         sourceInter = rd.getSource()
+                        # print "source inter add out rd", rd.id
                         sourceInter.addRoad(rd)
+
                         # add a road for opposite direction
                         opRd = Road(rd.corners, rd.center, rd.getTarget(), rd.getSource())
+                        # print "target inter add op out rd", opRd.id
                         inter.addRoad(opRd)
-                        rd.getSource().addInRoad(opRd)
+                        # print "source inter add op in rd", opRd.id
+                        sourceInter.addInRoad(opRd)
                         self.roads[opRd.id] = opRd
+                        if sourceInter.getRoads() and sourceInter.getInRoads() and sourceInter.id not in self.intersections:
+                            self.intersections[sourceInter.id] = sourceInter
+
             if inter.getRoads() and inter.getInRoads():
                 self.intersections[inter.id] = inter
+                if len(inter.getRoads()) != len(inter.getInRoads()):
+                    print "intersection has different number of roads and in roads"
+
+        for inter in self.intersections.values():
+            inter.buildControlSignal()
 
         # examine map
         print ""
@@ -103,11 +115,29 @@ class RealMap(object):
             if not road.lanes:
                 print "Err: no lane on a road"
         for inter in self.intersections.values():
-            if len(inter.getRoads()) == 0:
+            roadNum = len(inter.getRoads())
+            if roadNum == 0:
                 print "Err: intersection has no road"
             for rd in inter.getRoads():
                 if not rd.lanes:
                     print "Eff: road", rd.id, "has no lane"
+
+        allInter = []
+        for inter in self.intersections.values():
+            allInter.append(inter.id)
+
+        for road in self.roads.values():
+            if road.target.id not in allInter:
+                print "Err: target intersection not found"
+                print road.target.getRoads()
+                print road.target.getInRoads()
+                self.intersections[road.target.id] = road.target
+            if road.source.id not in allInter:
+                print "Err: source intersection not found"
+                print road.source.getRoads()
+                print road.source.getInRoads()
+                self.intersections[road.source.id] = road.source
+
         print "checking ends"
         print "using", (time.time() - start_time), "seconds"
 
@@ -233,10 +263,9 @@ class RealMap(object):
     def isCarRunsOk(self):
         return self.carRunsOk
 
-    def changeContralSignal(self, delta):
+    def updateContralSignal(self, delta):
         for inter in self.intersections.values():
-            inter.controlSignals.onTick(delta)
-        pass
+            inter.controlSignals.updateSignal(delta)
 
     def plotMap(self):
         """

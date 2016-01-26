@@ -115,7 +115,7 @@ class Car(object):
         step = self.speed * second / 3600.0 + 0.5 * acceleration * math.pow(second, 2)
         nextCarDist = self.trajectory.nextCarDistance()[1]
         if nextCarDist < step:
-            print 'step is longer than the distance to the next car'
+            # print 'step is longer than the distance to the next car'
             step = nextCarDist
         if self.trajectory.timeToMakeTurn(step):
             if self.nextLane is None:

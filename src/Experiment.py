@@ -81,11 +81,13 @@ class Experiment(object):
             preTime = time.time()
             # print "interval:", interval
             for car in self.env.getCars().values():
-                car.move(interval)  # convert millisecond to second
+                car.move(interval * 5)  # convert millisecond to second
                 # period = (time.time() - start_time)
                 # print "car move uses", (time.time() - start_time), "seconds"
                 # while (time.time() - start_time) * 1000 < ANIMATION_LAPSE:
                 #     print ".",
+
+            self.env.updateContralSignal(interval)
 
             # self.env.map.showMap()
             # plt.plot([self.env.getGoalLocation()[0]], \

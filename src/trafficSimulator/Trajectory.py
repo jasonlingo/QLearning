@@ -124,8 +124,7 @@ class Trajectory(object):
         # turnNumber = sourceLane.getTurnDirection(nextLane)
         # sideId = sourceLane.road.targetSideId
         # sideId = sourceLane.getSideId()
-        # return intersection.controlSignals.states[sideId][turnNumber]
-        return True
+        return intersection.controlSignals.canEnterIntersection(sourceLane, nextLane)
 
     def getDistanceToIntersection(self):
         """

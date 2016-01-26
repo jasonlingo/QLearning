@@ -173,3 +173,6 @@ class Environment(QLEnvironment):
 
     def isAniMapPlotOk(self):
         return self.realMap.isAniMapPlotOk()
+
+    def updateContralSignal(self, delta):
+        self.realMap.updateContralSignal(delta)
