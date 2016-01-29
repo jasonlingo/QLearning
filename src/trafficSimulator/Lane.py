@@ -105,3 +105,5 @@ class Lane(object):
                 next = car
         return next
 
+    def getCars(self):
+        return [cp.car for cp in self.carsPosition.values()]

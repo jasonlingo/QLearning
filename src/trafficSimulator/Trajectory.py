@@ -3,7 +3,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from LanePosition import LanePosition
-# from geom.Curve import Curve
 import sys
 
 
@@ -43,6 +42,17 @@ class Trajectory(object):
         #     return self.temp.lane
         # else:
         return self.current.lane
+
+    def getRoad(self):
+        return self.lane.road
+
+    def getOppositeRoad(self):
+        source = self.current.lane.road.getSource()
+        sourceCoords = source.center.getCoords()
+        target = self.current.lane.road.getTarget()
+        for road in target.getRoads():
+            if road.target.center.getCoords() == sourceCoords:
+                return road
 
     def getAbsolutePosition(self):
         # if self.temp.lane:
@@ -124,7 +134,12 @@ class Trajectory(object):
         # turnNumber = sourceLane.getTurnDirection(nextLane)
         # sideId = sourceLane.road.targetSideId
         # sideId = sourceLane.getSideId()
-        return intersection.controlSignals.canEnterIntersection(sourceLane, nextLane)
+        result = intersection.controlSignals.canEnterIntersection(sourceLane, nextLane)
+        # if result:
+        #     print "can enter"
+        # else:
+        #     print "cannot enter"
+        return result
 
     def getDistanceToIntersection(self):
         """
@@ -154,6 +169,7 @@ class Trajectory(object):
         :param distance:
         :return:
         """
+        print "car moves", distance, "from", self.current.lane.road.id, self.current.position,
         distance = max(distance, 0)
         self.current.position += distance
         self.next.position += distance
@@ -177,6 +193,7 @@ class Trajectory(object):
             self.finishChangingLanes()
         if self.current.lane and not self.isChangingLanes and not self.car.nextLane:
             self.car.pickNextLane()
+        print "to", self.current.lane.road.id, self.current.position
 
     def changeLane(self, nextLane):
         if self.isChangingLanes:
@@ -224,7 +241,7 @@ class Trajectory(object):
             nextPosition = self.current.position - self.current.lane.length
         else:
             nextPosition = 0
-        nextPosition = 0
+        nextPosition = 0 #FIXME
 
         self.next.lane = nextLane
         # self.temp.lane = nextLane

@@ -3,8 +3,11 @@ from Road import Road
 from Car import *
 import pygmaps
 import webbrowser
-import os
 import time
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from Dijkstra import *
 
 
 class RealMap(object):
@@ -36,6 +39,7 @@ class RealMap(object):
         self.locDict = defaultdict(list)
         self.aniMapPlotOK = False
         self.carRunsOk = False
+        self.trafficTimeDict = {}
 
     def createMap(self):
         """
@@ -237,13 +241,6 @@ class RealMap(object):
     def getTaxis(self):
         return self.taxis
 
-    def moveCar(self):
-        """
-        update the coordinates of cars
-        :return: two lists that contain the x and y coordinates
-        """
-        pass
-
     def setResetFlag(self, b):
         self.reset = b
         self.locDict = defaultdict(list)
@@ -266,6 +263,85 @@ class RealMap(object):
     def updateContralSignal(self, delta):
         for inter in self.intersections.values():
             inter.controlSignals.updateSignal(delta)
+
+    def getOppositeRoad(self, road):
+        """
+        Find the road with opposite direction of the given road
+        :param road: the given road
+        :return: the road with opposite direction
+        """
+        source = road.getSource()
+        target = road.getTarget()
+
+        for rd in target.getRoads():
+            if rd.getTarget.id == source.id:
+                return rd
+
+    def neighbors(self, intersection):
+        """
+        Find and return the connected intersections of the given intersection
+        :param intersection:
+        :return: a list of intersections
+        """
+        return [road.getTarget() for road in intersection.getRoads()]
+
+    def cost(self, sourceIntersection, targetIntersection):
+        """
+        Calculate the time for a car to go through the road connecting the two given intersections.
+        The time is calculated by length / speed
+        :param sourceIntersection:
+        :param targetIntersection:
+        :return: return the traffic time (second)
+        """
+        road = None
+        for rd in sourceIntersection.getRoads():
+            if rd.getTarget().id == targetIntersection.id:
+                road = rd
+                break
+        return (road.getLength() / road.getAvgSpeed()) * 3600
+
+    def getRoadsBetweenIntersections(self, source, target):
+        """
+        Find the roads that connect the two given intersections:
+        :param source: intersection
+        :param target: intersection
+        :return: a list of roads
+        """
+        roads = []
+        for road in source.getRoads() + target.getRoads():
+            if road.getTarget() == target and road.getSource() == source:
+                roads.append(road)
+            elif road.getSource() == target and road.getTarget() == source:
+                roads.append(road)
+        return roads
+
+    def getAction(self, pos):
+        """
+        Find the available actions (turns) for the given LanePostion object.
+        :param pos (Road): given location
+        :return: list of action (Road)
+        """
+        targetInter = pos.getTarget()
+        sourceInter = pos.getSource()
+        roads = [road for road in targetInter.getRoads() if road.getTarget() != sourceInter]
+        if roads:
+            return roads
+        else:
+            return targetInter.getRoads()
+
+    def trafficTime(self, source, destination):
+        """
+        Calculate the time from the source location to the destination location considering the
+        speed limit of every sub-region.
+        Using Dijkstra's algorithm.
+        Args:
+            source: Road
+            destination: Road
+        Returns: traffic time
+        """
+        goals = [destination.getTarget(), destination.getSource()]
+        time = dijkstraTrafficTime(self, source.getTarget(), goals)
+        return time
 
     def plotMap(self):
         """

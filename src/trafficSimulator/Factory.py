@@ -1,7 +1,5 @@
-from Traffic import *
 from Road import *
 from Intersection import *
-
 
 
 class Factory(object):

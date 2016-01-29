@@ -1,11 +1,15 @@
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from QLearning import QLearning
-from Taxi import Taxi
-from Settings import *
-# import matplotlib.pyplot as plt
 import math
 import time
-from trafficSimulator.TrafficSettings import *
+from Queue import PriorityQueue
+from Dijkstra import dijkstraSearch
+import random
+
+
 
 class Experiment(object):
     """
@@ -42,6 +46,7 @@ class Experiment(object):
 
         self.iteration = 0
         self.plotMap = False
+        self.goalLocation = self.env.getGoalLocation()
 
     def startLearning(self):
         """
@@ -55,40 +60,56 @@ class Experiment(object):
         cnt = 0
         preTime = time.time()
         while not self.env.isGoalReached():
-            # cnt += 1
-            # if cnt % 1000 == 0:
-            #     print ".",
-
-            # Change the traffic light first
-            # self.env.changeContralSignal(TIME_STEP)
+            cnt += 1
+            if cnt % 100 == 0:
+                print ".",
+                if cnt % 8000 == 0: print ""
 
             # Call the fastest taxi in every iteration. If any non-called taxis
             # will be faster than the called taxis, the taxi will be returned.
             # Otherwise, it return None.
-            taxi = self.findFastestTaxi()
-            if taxi is not None:
-                self.callTaxi(taxi)
+            # interval = min((time.time() - preTime) * 50, 100)
+            # interval = min((time.time() - preTime) * 5, 200)
+            # interval = random.random() * 100 + 100
+            interval = (time.time() - preTime) * 1000
+            print "interval", interval
+            preTime = time.time()
+            # interval = 100
+
+            if not self.calledTaxiQL:
+                taxi = self.findFastestTaxi()
+                if taxi is not None:
+                    self.callTaxi(taxi)
 
             # perform Q learning for called taxis
             for ql in self.calledTaxiQL:
-                ql.go()
+                ql.go(interval)
 
             for taxi in self.taxiList:
-                taxi.move(TIME_STEP)
+                taxi.move(interval)
                 # taxi.setRandomAvailable()
 
-            interval = time.time() - preTime
-            preTime = time.time()
-            # print "interval:", interval
+            # for taxi in self.calledTaxi:  # already put in the ql.go()
+            #     taxi.move(interval * 5)
+
             for car in self.env.getCars().values():
-                car.move(interval * 5)  # convert millisecond to second
+                car.move(interval)  # convert millisecond to second
                 # period = (time.time() - start_time)
                 # print "car move uses", (time.time() - start_time), "seconds"
                 # while (time.time() - start_time) * 1000 < ANIMATION_LAPSE:
                 #     print ".",
 
+            # update control signals at every intersection
             self.env.updateContralSignal(interval)
 
+
+            # if cnt % 1000 == 0:
+            #     for road in self.env.realMap.getRoads().values():
+            #         road.updateAvgSpeed()
+
+            # ======================================================
+            # plot experiment data on map
+            # ======================================================
             # self.env.map.showMap()
             # plt.plot([self.env.getGoalLocation()[0]], \
             #          [self.env.getGoalLocation()[1]], "ro")
@@ -128,11 +149,13 @@ class Experiment(object):
         self.env.clearTaxis()
         self.env.addRandomCars(self.carNum)
         self.env.addRandomTaxis(self.taxiNum)
+        self.taxiList = self.env.getTaxis().values()
 
-        self.calledTaxi = []
+        self.calledTaxiQL = []
 
         self.env.setReachGoal(False)
         self.setResetFlag(False)  # Tell the animated map to start plotting cars and taxis
+
 
     def setResetFlag(self, b):
         """
@@ -184,40 +207,56 @@ class Experiment(object):
         for key in self.nsa.keys():
             f.write(str(key) + ": " + str(self.nsa[key]) +"\n")
 
+    # def findFastestTaxi(self):
+    #     """
+    #     Find the fastest taxi to the goal location
+    #     :return: the fastest taxi to the goal location
+    #     """
+    #     fastestTaxi = None
+    #     shortestTime = sys.maxint
+    #
+    #     for ql in self.calledTaxiQL:
+    #         time = self.env.timeToGoalState(ql.getTaxi().getPosition())
+    #         if time < shortestTime:
+    #             shortestTime = time
+    #
+    #     # Find the taxi with shorter time than the called taxis to the goal location.
+    #     # By certain minutes shorter do we consider it is quicker than the called taxis to the goal location.
+    #     # for taxi in self.env.getTaxis().values():
+    #     #     if taxi.isAvailable():
+    #     #         taxi.setAvailable(False)  # lock this taxi first
+    #     #         time = self.env.timeToGoalState(taxi.getPosition())
+    #     #         if time < shortestTime:
+    #     #             if fastestTaxi is not None:
+    #     #                 fastestTaxi.setAvailable(True)  # unlock the previous fastest taxi
+    #     #             fastestTaxi = taxi
+    #     #             shortestTime = time
+    #     #         else:
+    #     #             taxi.setAvailable(True)  # unlock this taxi
+    #     return fastestTaxi
+
     def findFastestTaxi(self):
         """
-        Find the fastest taxi to the goal location
-        :return: the fastest taxi to the goal location
+        From the goal's location, start performing search algorithm, expanding the route until reach one taxi
+        and the time at other branches are longer than the found taxi.
+        :return: the fastest taxi to the goal location.
         """
-        fastestTaxi = None
-        shortestTime = sys.maxint
-
-        for ql in self.calledTaxiQL:
-            time = self.env.timeToGoalState(ql.getTaxi().getPosition())
-            if time < shortestTime:
-                shortestTime = time
-
-        # Find the taxi with shorter time than the called taxis to the goal location.
-        # By certain minutes shorter do we consider it is quicker than the called taxis to the goal location.
-        # for taxi in self.env.getTaxis().values():
-        #     if taxi.isAvailable():
-        #         taxi.setAvailable(False)  # lock this taxi first
-        #         time = self.env.timeToGoalState(taxi.getPosition())
-        #         if time < shortestTime:
-        #             if fastestTaxi is not None:
-        #                 fastestTaxi.setAvailable(True)  # unlock the previous fastest taxi
-        #             fastestTaxi = taxi
-        #             shortestTime = time
-        #         else:
-        #             taxi.setAvailable(True)  # unlock this taxi
-        return fastestTaxi
+        goal = self.env.getGoalLocation()  # a Trajectory object
+        targetInter = goal.current.lane.road.getTarget()
+        sourceInter = goal.current.lane.road.getSource()
+        taxi1, time1 = dijkstraSearch(self.env.realMap, sourceInter, self.taxiList)
+        taxi2, time2 = dijkstraSearch(self.env.realMap, targetInter, self.taxiList)
+        return taxi1 if time1 < time2 else taxi2
 
     def callTaxi(self, taxi):
         """
         Create a QLearning object that learns the Q value of this called taxi
         :param taxi: the called taxi
         """
-        taxi.beenCalled()
+        goalLane = self.goalLocation.current.lane
+        goalRoad = goalLane.road
+        goalPosition = self.goalLocation.current.position
+        taxi.beenCalled(goalRoad, goalLane, goalPosition)
         ql = QLearning(taxi, self.env, self.qvalue, self.nsa, self.getEpsilon())
         self.calledTaxiQL.append(ql)
         self.taxiList.remove(taxi)

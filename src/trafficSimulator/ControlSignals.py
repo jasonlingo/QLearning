@@ -3,14 +3,15 @@ import random
 import numpy as np
 import sys
 import math
-import time
+from Traffic import Traffic
 
 class ControlSignals(object):
 
     def __init__(self, intersection):
         self.intersection = intersection
         self.time = 0
-        self.flipMultiplier = 1 + random.random() * 0.4 - 0.2
+        self.id = Traffic.uniqueId("ControlSignal")
+        self.flipMultiplier = 2 + random.random() * 0.4 - 0.2
         self.flipInterval = self.flipMultiplier * LIGHT_FLIP_INTERVAL
         self.stateNum = 0
         # TODO: make this for intersections that have more than 4 roads
@@ -204,6 +205,10 @@ class ControlSignals(object):
         # print self.states[self.stateNum]
 
     def updateSignal(self, delta):
+        """
+        :param delta: second
+        :return:
+        """
         self.time += delta
         if self.time > self.flipInterval:
             self.flip()

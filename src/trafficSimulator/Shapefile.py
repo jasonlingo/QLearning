@@ -67,7 +67,7 @@ class Shapefile(object):
             i += 1
             if i % 10000 == 0:
                 print ".",
-            if i > 5000:
+            if i > 3000:
                 break
             if sh.record[3] == roadType:
                 lats = [p[1] for p in sh.shape.points]
