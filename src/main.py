@@ -17,6 +17,7 @@ if __name__ == '__main__':
             time.sleep(1)
         for i in range(EXP_NUM):
             print "========== " + str(i+1) + "-th trial =========="
+            print "Goal locates at", exp.goalLocation.current.lane.road.id
             exp.startLearning()
 
         # Print the results

@@ -31,12 +31,17 @@ class LanePosition(object):
         return self.position / float(self.lane.length)
 
     def nextCarDistance(self):
-        next = self.getNext()  # this method return a LanePosition
-        if next:
-            rearPosition = next.position - (next.car.length / 2.0 if next.car else 0)  # the next.car might be the crash's location and will be None
-            frontPosition = self.position + self.car.length / 2.0
-            return next.car, rearPosition - frontPosition
-        return None, sys.maxint
+        nextList = self.getNext()  # this method return a list of LanePosition
+        nextCar = None
+        nextRearPos = sys.maxint
+        frontPosition = self.position + self.car.length / 2.0
+        for lanePosition in nextList:
+            if lanePosition.isGoal() and not self.car.isTaxi:
+                continue
+            rearPosition = lanePosition.position - (lanePosition.car.length / 2.0 if lanePosition.car else 0)  # the next.car might be the crash's location and will be None
+            if rearPosition < nextRearPos and rearPosition >= frontPosition:
+                nextRearPos = rearPosition
+        return nextCar, nextRearPos - frontPosition
 
     def acquire(self):
         if self.lane:
@@ -51,8 +56,9 @@ class LanePosition(object):
     def getNext(self):
         """
         Get the front car of this current car
-        :return: the front car's LanePosition
+        :return: a list that contains the front car's and the goal's LanePositions
         """
         if self.lane and not self.free:
             return self.lane.getNext(self)
+        return []
 

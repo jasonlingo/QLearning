@@ -3,7 +3,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from LanePosition import LanePosition
-# from geom.Curve import Curve
 import sys
 
 
@@ -43,6 +42,17 @@ class Trajectory(object):
         #     return self.temp.lane
         # else:
         return self.current.lane
+
+    def getRoad(self):
+        return self.lane.road
+
+    def getOppositeRoad(self):
+        source = self.current.lane.road.getSource()
+        sourceCoords = source.center.getCoords()
+        target = self.current.lane.road.getTarget()
+        for road in target.getRoads():
+            if road.target.center.getCoords() == sourceCoords:
+                return road
 
     def getAbsolutePosition(self):
         # if self.temp.lane:
@@ -121,11 +131,7 @@ class Trajectory(object):
         if not nextLane:
             return True
         intersection = self.nextIntersection()
-        # turnNumber = sourceLane.getTurnDirection(nextLane)
-        # sideId = sourceLane.road.targetSideId
-        # sideId = sourceLane.getSideId()
-        # return intersection.controlSignals.states[sideId][turnNumber]
-        return True
+        return intersection.controlSignals.canEnterIntersection(sourceLane, nextLane)
 
     def getDistanceToIntersection(self):
         """
@@ -155,10 +161,12 @@ class Trajectory(object):
         :param distance:
         :return:
         """
+        # print "car", self.car.id, "moves", distance, "from", self.current.lane.road.id, self.current.position,
         distance = max(distance, 0)
+        if distance == 0:
+            return
         self.current.position += distance
         self.next.position += distance
-        # self.temp.position += distance
         if self.timeToMakeTurn() and self.canEnterIntersection() and self.isValidTurn():
             self.startChangingLanes(self.car.popNextLane(), distance)
 
@@ -178,6 +186,7 @@ class Trajectory(object):
             self.finishChangingLanes()
         if self.current.lane and not self.isChangingLanes and not self.car.nextLane:
             self.car.pickNextLane()
+        # print "to", self.current.lane.road.id, self.current.position
 
     def changeLane(self, nextLane):
         if self.isChangingLanes:
@@ -221,24 +230,17 @@ class Trajectory(object):
             print "no next lane"
         self.isChangingLanes = True
 
-        if self.current.position >= self.current.lane.length:
-            nextPosition = self.current.position - self.current.lane.length
-        else:
-            nextPosition = 0
-        nextPosition = 0
+        # if self.current.position >= self.current.lane.length:
+        #     nextPosition = self.current.position - self.current.lane.length
+        # else:
+        #     nextPosition = 0
 
         self.next.lane = nextLane
-        # self.temp.lane = nextLane
-        self.next.position = nextPosition if nextPosition < self.next.lane.length else 0
-        # self.temp.position = nextPosition
-
-        # self.next.lane = nextLane
-        # self.next.position = nextPosition
-        # curve = self.getCurve()
-        # self.temp.lane = curve
-        # self.temp.position = 0
-        # self.next.position -= self.temp.lane.length
-        # return self.next.position
+        nextLaneCar, nextLaneCarPosition = self.next.nextCarDistance()
+        nextLaneCarPosition = nextLaneCarPosition if nextLaneCar else self.next.lane.length
+        remainderDistance = max(self.current.position - self.current.lane.length, 0)
+        nextPosition = min(remainderDistance, nextLaneCarPosition)
+        self.next.position = nextPosition
 
     def finishChangingLanes(self):
         if not self.isChangingLanes:

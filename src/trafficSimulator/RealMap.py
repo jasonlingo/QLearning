@@ -3,8 +3,11 @@ from Road import Road
 from Car import *
 import pygmaps
 import webbrowser
-import os
 import time
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from Dijkstra import *
 
 
 class RealMap(object):
@@ -36,6 +39,7 @@ class RealMap(object):
         self.locDict = defaultdict(list)
         self.aniMapPlotOK = False
         self.carRunsOk = False
+        self.trafficTimeDict = {}
 
     def createMap(self):
         """
@@ -59,20 +63,32 @@ class RealMap(object):
                 if rd.isConnected(inter):
                     if not rd.getSource():
                         rd.setSource(inter)  # FIXME: reduce some distance for intersection?
-                        # inter.addRoad(rd)
                     elif not rd.getTarget():
                         rd.setTarget(inter)
+                        # print "target inter add in rd", rd.id
                         inter.addInRoad(rd)
                         self.roads[rd.id] = rd
                         sourceInter = rd.getSource()
+                        # print "source inter add out rd", rd.id
                         sourceInter.addRoad(rd)
+
                         # add a road for opposite direction
                         opRd = Road(rd.corners, rd.center, rd.getTarget(), rd.getSource())
+                        # print "target inter add op out rd", opRd.id
                         inter.addRoad(opRd)
-                        rd.getSource().addInRoad(opRd)
+                        # print "source inter add op in rd", opRd.id
+                        sourceInter.addInRoad(opRd)
                         self.roads[opRd.id] = opRd
+                        if sourceInter.getRoads() and sourceInter.getInRoads() and sourceInter.id not in self.intersections:
+                            self.intersections[sourceInter.id] = sourceInter
+
             if inter.getRoads() and inter.getInRoads():
                 self.intersections[inter.id] = inter
+                if len(inter.getRoads()) != len(inter.getInRoads()):
+                    print "intersection has different number of roads and in roads"
+
+        for inter in self.intersections.values():
+            inter.buildControlSignal()
 
         # examine map
         print ""
@@ -103,11 +119,29 @@ class RealMap(object):
             if not road.lanes:
                 print "Err: no lane on a road"
         for inter in self.intersections.values():
-            if len(inter.getRoads()) == 0:
+            roadNum = len(inter.getRoads())
+            if roadNum == 0:
                 print "Err: intersection has no road"
             for rd in inter.getRoads():
                 if not rd.lanes:
                     print "Eff: road", rd.id, "has no lane"
+
+        allInter = []
+        for inter in self.intersections.values():
+            allInter.append(inter.id)
+
+        for road in self.roads.values():
+            if road.target.id not in allInter:
+                print "Err: target intersection not found"
+                print road.target.getRoads()
+                print road.target.getInRoads()
+                self.intersections[road.target.id] = road.target
+            if road.source.id not in allInter:
+                print "Err: source intersection not found"
+                print road.source.getRoads()
+                print road.source.getInRoads()
+                self.intersections[road.source.id] = road.source
+
         print "checking ends"
         print "using", (time.time() - start_time), "seconds"
 
@@ -156,10 +190,14 @@ class RealMap(object):
     def getGoalLanePosition(self):
         return self.goalLocation
 
-    def clearTaxis(self):
+    def cleanTaxis(self):
+        for taxi in self.taxis.values():
+            taxi.release()
         self.taxis = {}
 
-    def clearCars(self):
+    def cleanCars(self):
+        for car in self.cars.values():
+            car.release()
         self.cars = {}
 
     def addRandomCars(self, num):
@@ -207,13 +245,6 @@ class RealMap(object):
     def getTaxis(self):
         return self.taxis
 
-    def moveCar(self):
-        """
-        update the coordinates of cars
-        :return: two lists that contain the x and y coordinates
-        """
-        pass
-
     def setResetFlag(self, b):
         self.reset = b
         self.locDict = defaultdict(list)
@@ -233,10 +264,88 @@ class RealMap(object):
     def isCarRunsOk(self):
         return self.carRunsOk
 
-    def changeContralSignal(self, delta):
+    def updateContralSignal(self, delta):
         for inter in self.intersections.values():
-            inter.controlSignals.onTick(delta)
-        pass
+            inter.controlSignals.updateSignal(delta)
+
+    def getOppositeRoad(self, road):
+        """
+        Find the road with opposite direction of the given road
+        :param road: the given road
+        :return: the road with opposite direction
+        """
+        source = road.getSource()
+        target = road.getTarget()
+
+        for rd in target.getRoads():
+            if rd.getTarget.id == source.id:
+                return rd
+
+    def neighbors(self, intersection):
+        """
+        Find and return the connected intersections of the given intersection
+        :param intersection:
+        :return: a list of intersections
+        """
+        return [road.getTarget() for road in intersection.getRoads()]
+
+    def cost(self, sourceIntersection, targetIntersection):
+        """
+        Calculate the time for a car to go through the road connecting the two given intersections.
+        The time is calculated by length / speed
+        :param sourceIntersection:
+        :param targetIntersection:
+        :return: return the traffic time (second)
+        """
+        road = None
+        for rd in sourceIntersection.getRoads():
+            if rd.getTarget().id == targetIntersection.id:
+                road = rd
+                break
+        return (road.getLength() / road.getAvgSpeed()) * 3600
+
+    def getRoadsBetweenIntersections(self, source, target):
+        """
+        Find the roads that connect the two given intersections:
+        :param source: intersection
+        :param target: intersection
+        :return: a list of roads
+        """
+        roads = []
+        for road in source.getRoads() + target.getRoads():
+            if road.getTarget() == target and road.getSource() == source:
+                roads.append(road)
+            elif road.getSource() == target and road.getTarget() == source:
+                roads.append(road)
+        return roads
+
+    def getAction(self, pos):
+        """
+        Find the available actions (turns) for the given LanePostion object.
+        :param pos (Road): given location
+        :return: list of action (Road)
+        """
+        targetInter = pos.getTarget()
+        sourceInter = pos.getSource()
+        roads = [road for road in targetInter.getRoads() if road.getTarget() != sourceInter]
+        if roads:
+            return roads
+        else:
+            return targetInter.getRoads()
+
+    def trafficTime(self, source, destination):
+        """
+        Calculate the time from the source location to the destination location considering the
+        speed limit of every sub-region.
+        Using Dijkstra's algorithm.
+        Args:
+            source: Road
+            destination: Road
+        Returns: traffic time
+        """
+        goals = [destination.getTarget(), destination.getSource()]
+        time = dijkstraTrafficTime(self, source.getTarget(), goals)
+        return time
 
     def plotMap(self):
         """

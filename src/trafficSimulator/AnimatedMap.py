@@ -1,13 +1,7 @@
-# import matplotlib
-# matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
-# import scipy.integrate as integrate
 import matplotlib.animation as animation
-from RealMap import RealMap
-from Car import *
 import threading
-import Tkinter as tk
-from TrafficSettings import *
+
 
 class AnimatedMap(threading.Thread):
     """
@@ -66,14 +60,11 @@ class AnimatedMap(threading.Thread):
                     plt.plot(xs, ys, color='k')
 
             # initialize markers for cars, taxis, and the goal location
-            self.carPoints, = ax.plot([], [], 'bo', ms=5)
-            self.taxiPoints, = ax.plot([], [], 'yo', ms=5)
+            self.carPoints, = ax.plot([], [], 'bo', ms=4)
+            self.taxiPoints, = ax.plot([], [], 'yo', ms=4)
             self.calledTaxiPoints, = ax.plot([], [], 'ro', ms=5)
             goalLng, goalLat = self.realMap.getGoalPosition()
-            self.goalPoint, = ax.plot([goalLng], [goalLat], 'r*', ms=10)
-            # self.carPoints.set_data([], [])
-            # self.calledTaxiPoints.set_data([], [])
-            # self.taxiPoints.set_data([], [])
+            self.goalPoint, = ax.plot([goalLng], [goalLat], 'r*', ms=9)
             self.realMap.setAniMapPlotOk(True)
 
         def animate(i):
@@ -87,14 +78,16 @@ class AnimatedMap(threading.Thread):
                 self.carPoints.set_data([], [])
                 self.taxiPoints.set_data([], [])
                 self.calledTaxiPoints.set_data([], [])
+                # self.changedSignals.set_data([], [])
             else:
                 cars = self.realMap.getCars().values()
                 taxis = self.realMap.getTaxis().values()
             self.carPoints.set_data([car.getCoords()[0] for car in cars], [car.getCoords()[1] for car in cars])
             self.calledTaxiPoints.set_data([taxi.getCoords()[0] for taxi in taxis if taxi.called], [taxi.getCoords()[1] for taxi in taxis if taxi.called])
             self.taxiPoints.set_data([taxi.getCoords()[0] for taxi in taxis if not taxi.called], [taxi.getCoords()[1] for taxi in taxis if not taxi.called])
+            # self.changedSignals.set_data([coor[0] for coor in self.realMap.changedSignal], [coor[1] for coor in self.realMap.changedSignal])
 
-        ani = animation.FuncAnimation(fig, animate, init_func=init, interval=25, blit=False)
+        ani = animation.FuncAnimation(fig, animate, init_func=init, interval=100, blit=False)
         plt.show()
 
 
@@ -108,6 +101,3 @@ class AnimatedMap(threading.Thread):
 # amap = AnimatedMap(rmap)
 # fig, ax = plt.subplots()
 # amap.plotAnimatedMap(fig, ax)
-
-
-

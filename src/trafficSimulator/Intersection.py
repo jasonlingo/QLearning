@@ -23,17 +23,6 @@ class Intersection(object):
         self.inRoads = []
         self.controlSignals = ControlSignals(self)
 
-    # def copy(self, inters):
-    #     """
-    #     Create a new intersection object according to the given intersection object.
-    #     Return the newly created intersection object
-    #     :param inters: the intersection to be copied
-    #     :return: a new intersection object
-    #     """
-    #     newInters = Intersection(inters.corners, inters.center, inters.rect)
-    #     for rd in inters.getRoad():
-    #         newInters.addRoad(rd.copy())
-
     def update(self):
         for rd in self.roads:
             rd.update()
@@ -52,7 +41,19 @@ class Intersection(object):
         return self.inRoads
 
     def addRoad(self, rd):
-        self.roads.append(rd)
+        if rd.target.center.getCoords() not in [road.target.center.getCoords() for road in self.roads]:
+            self.roads.append(rd)
+        # else:
+        #     print "duplicated out road"
 
     def addInRoad(self, rd):
-        self.inRoads.append(rd)
+        if rd.source.center.getCoords() not in [road.source.center.getCoords() for road in self.inRoads]:
+            self.inRoads.append(rd)
+        # else:
+        #     print "duplicated in road"
+
+    def buildControlSignal(self):
+        self.controlSignals.generateState()
+
+    def getTurnDirection(self, lane):
+        return self.controlSignals.getTurnDirection(lane)

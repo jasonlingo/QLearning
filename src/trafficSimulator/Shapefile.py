@@ -63,7 +63,7 @@ class Shapefile(object):
         print "Loading", roadType,
         i = 0
         result = {}
-        for sh in self.ctr.iterShapeRecords():
+        for sh in self.ctr.iterShapeRecords():  # total 52339 records
             i += 1
             if i % 10000 == 0:
                 print ".",
@@ -104,8 +104,8 @@ class Shapefile(object):
                 # For checking correctness
                 # check.extend(corners)
 
-                rd = self.makeRoads(roadType, corners, center)
-                result[rd.id] = rd
+                rdInter = self.makeRoads(roadType, corners, center)
+                result[rdInter.id] = rdInter
         # return data, check
         print ""
         return result
