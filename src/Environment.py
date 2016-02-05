@@ -161,12 +161,12 @@ class Environment(QLEnvironment):
         self.realMap.addRandomTaxi(num)
         self.taxis = self.realMap.getTaxis()
 
-    def clearCars(self):
-        self.realMap.clearCars()
+    def cleanCars(self):
+        self.realMap.cleanCars()
         self.cars = None
 
-    def clearTaxis(self):
-        self.realMap.clearTaxis()
+    def cleanTaxis(self):
+        self.realMap.cleanTaxis()
         self.taxis = None
 
     def getCars(self):

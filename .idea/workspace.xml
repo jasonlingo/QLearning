@@ -3,20 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="98e1bb8c-916d-4d33-b3ac-0d31ffc94c52" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Dijkstra.py" afterPath="$PROJECT_DIR$/src/Dijkstra.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Environment.py" afterPath="$PROJECT_DIR$/src/Environment.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Experiment.py" afterPath="$PROJECT_DIR$/src/Experiment.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/QLearning.py" afterPath="$PROJECT_DIR$/src/QLearning.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Settings.py" afterPath="$PROJECT_DIR$/src/Settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main.py" afterPath="$PROJECT_DIR$/src/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/AnimatedMap.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/AnimatedMap.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Car.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Car.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/ControlSignals.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/ControlSignals.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Factory.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Factory.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Lane.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Lane.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/LanePosition.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/LanePosition.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/RealMap.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/RealMap.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Road.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Road.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Shapefile.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Shapefile.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Traffic.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Traffic.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/TrafficSettings.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/TrafficSettings.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/trafficSimulator/Trajectory.py" afterPath="$PROJECT_DIR$/src/trafficSimulator/Trajectory.py" />
     </list>
     <ignored path="QLearning.iws" />
@@ -42,45 +37,21 @@
         <entry file="file://$PROJECT_DIR$/src/main.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="17" column="25" selection-start-line="17" selection-start-column="25" selection-end-line="17" selection-end-column="25" />
+              <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
               <folding>
-                <marker date="1454027296000" expanded="true" signature="1160:1296" placeholder="..." />
+                <marker date="1454563819000" expanded="true" signature="1160:1296" placeholder="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Trajectory.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Trajectory.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="4.476773">
-              <caret line="232" column="25" selection-start-line="232" selection-start-column="8" selection-end-line="232" selection-end-column="25" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Experiment.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Experiment.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Experiment.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.111111">
-              <caret line="73" column="53" selection-start-line="73" selection-start-column="53" selection-end-line="73" selection-end-column="53" />
+            <state vertical-scroll-proportion="0.69124424">
+              <caret line="73" column="51" selection-start-line="73" selection-start-column="51" selection-end-line="73" selection-end-column="51" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Environment.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Environment.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-12.925926">
-              <caret line="189" column="27" selection-start-line="189" selection-start-column="8" selection-end-line="189" selection-end-column="27" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -89,8 +60,52 @@
       <file leaf-file-name="Car.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Car.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-5.5925927">
-              <caret line="50" column="5" selection-start-line="50" selection-start-column="5" selection-end-line="50" selection-end-column="5" />
+            <state vertical-scroll-proportion="-28.407408">
+              <caret line="113" column="17" selection-start-line="113" selection-start-column="17" selection-end-line="113" selection-end-column="17" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Settings.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="11" column="11" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RealMap.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/RealMap.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="175" column="29" selection-start-line="175" selection-start-column="8" selection-end-line="175" selection-end-column="29" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Road.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Road.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-10.0">
+              <caret line="76" column="38" selection-start-line="76" selection-start-column="38" selection-end-line="76" selection-end-column="38" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Environment.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Environment.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-3.5185184">
+              <caret line="162" column="0" selection-start-line="162" selection-start-column="0" selection-end-line="162" selection-end-column="0" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -101,8 +116,8 @@
       <file leaf-file-name="QLearning.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/QLearning.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.888889">
-              <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="71" column="0" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -110,45 +125,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Settings.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Settings.py">
+      <file leaf-file-name="Trajectory.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Trajectory.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
+              <caret line="143" column="8" selection-start-line="143" selection-start-column="8" selection-end-line="143" selection-end-column="8" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RealMap.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/RealMap.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-5.037037">
-              <caret line="262" column="27" selection-start-line="262" selection-start-column="8" selection-end-line="262" selection-end-column="27" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ControlSignals.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/ControlSignals.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-10.148149">
-              <caret line="215" column="5" selection-start-line="215" selection-start-column="5" selection-end-line="215" selection-end-column="5" />
-              <folding>
-                <element signature="e#0#29#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AnimatedMap.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/AnimatedMap.py">
+      <file leaf-file-name="Lane.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Lane.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="89" column="78" selection-start-line="89" selection-start-column="78" selection-end-line="89" selection-end-column="78" />
+              <caret line="14" column="50" selection-start-line="14" selection-start-column="50" selection-end-line="14" selection-end-column="50" />
               <folding />
             </state>
           </provider>
@@ -174,7 +165,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/trafficSimulator/anmi.py" />
         <option value="$PROJECT_DIR$/src/testAni.py" />
         <option value="$PROJECT_DIR$/src/testAni2.py" />
         <option value="$PROJECT_DIR$/src/TestAni/double_pendulum_animated.py" />
@@ -204,27 +194,28 @@
         <option value="$PROJECT_DIR$/src/geom/__init__.py" />
         <option value="$PROJECT_DIR$/src/TestAni/testDict.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Animated2Map.py" />
-        <option value="$PROJECT_DIR$/src/trafficSimulator/LanePosition.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Intersection.py" />
-        <option value="$PROJECT_DIR$/src/trafficSimulator/TrafficSettings.py" />
         <option value="$PROJECT_DIR$/src/Astar.py" />
-        <option value="$PROJECT_DIR$/src/trafficSimulator/Lane.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Factory.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Traffic.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Road.py" />
         <option value="$PROJECT_DIR$/src/Taxi.py" />
+        <option value="$PROJECT_DIR$/src/QLearning.py" />
+        <option value="$PROJECT_DIR$/src/trafficSimulator/ControlSignals.py" />
+        <option value="$PROJECT_DIR$/src/TestAni/testcopy.py" />
+        <option value="$PROJECT_DIR$/src/trafficSimulator/AnimatedMap.py" />
         <option value="$PROJECT_DIR$/src/Dijkstra.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Shapefile.py" />
-        <option value="$PROJECT_DIR$/src/trafficSimulator/RealMap.py" />
-        <option value="$PROJECT_DIR$/src/Environment.py" />
-        <option value="$PROJECT_DIR$/src/QLearning.py" />
-        <option value="$PROJECT_DIR$/src/main.py" />
         <option value="$PROJECT_DIR$/src/Settings.py" />
-        <option value="$PROJECT_DIR$/src/trafficSimulator/ControlSignals.py" />
-        <option value="$PROJECT_DIR$/src/trafficSimulator/AnimatedMap.py" />
-        <option value="$PROJECT_DIR$/src/Experiment.py" />
+        <option value="$PROJECT_DIR$/src/trafficSimulator/LanePosition.py" />
+        <option value="$PROJECT_DIR$/src/trafficSimulator/TrafficSettings.py" />
+        <option value="$PROJECT_DIR$/src/Environment.py" />
+        <option value="$PROJECT_DIR$/src/trafficSimulator/RealMap.py" />
+        <option value="$PROJECT_DIR$/src/main.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Car.py" />
         <option value="$PROJECT_DIR$/src/trafficSimulator/Trajectory.py" />
+        <option value="$PROJECT_DIR$/src/trafficSimulator/Lane.py" />
+        <option value="$PROJECT_DIR$/src/Experiment.py" />
       </list>
     </option>
   </component>
@@ -259,8 +250,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -319,7 +310,7 @@
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../HW_2_Game Playing/search" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Dropbox/Courses/600.465 Natural Language Processing/Assignments/HW1/src" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -341,23 +332,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="QLearning" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="anim2" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/TestAni" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="QLearning" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/TestAni/anim2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -409,6 +383,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="QLearning" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/TestAni/testDict.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="testcopy" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/TestAni" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="QLearning" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/TestAni/testcopy.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -537,18 +528,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.main" />
-      <item index="1" class="java.lang.String" itemvalue="Python.anim2" />
-      <item index="2" class="java.lang.String" itemvalue="Python.leetcode" />
-      <item index="3" class="java.lang.String" itemvalue="Python.testif" />
-      <item index="4" class="java.lang.String" itemvalue="Python.testDict" />
+      <item index="1" class="java.lang.String" itemvalue="Python.leetcode" />
+      <item index="2" class="java.lang.String" itemvalue="Python.testif" />
+      <item index="3" class="java.lang.String" itemvalue="Python.testDict" />
+      <item index="4" class="java.lang.String" itemvalue="Python.testcopy" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.main" />
-        <item index="1" class="java.lang.String" itemvalue="Python.testDict" />
-        <item index="2" class="java.lang.String" itemvalue="Python.testif" />
-        <item index="3" class="java.lang.String" itemvalue="Python.leetcode" />
-        <item index="4" class="java.lang.String" itemvalue="Python.anim2" />
+        <item index="1" class="java.lang.String" itemvalue="Python.testcopy" />
+        <item index="2" class="java.lang.String" itemvalue="Python.testDict" />
+        <item index="3" class="java.lang.String" itemvalue="Python.testif" />
+        <item index="4" class="java.lang.String" itemvalue="Python.leetcode" />
       </list>
     </recent_temporary>
   </component>
@@ -581,19 +572,19 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="25" y="23" width="1255" height="777" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1636953" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32846716" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43649635" sideWeight="0.5032415" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32605532" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32554746" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3245997" sideWeight="0.49675852" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32554746" sideWeight="0.49675852" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32846716" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4352256" sideWeight="0.49675852" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4350365" sideWeight="0.49675852" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -627,11 +618,6 @@
           <option name="timeStamp" value="95" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/src/trafficSimulator/Trajectory.py</url>
-          <line>49</line>
-          <option name="timeStamp" value="108" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/src/trafficSimulator/Road.py</url>
           <line>74</line>
           <option name="timeStamp" value="109" />
@@ -647,34 +633,54 @@
           <option name="timeStamp" value="150" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/src/QLearning.py</url>
-          <line>130</line>
-          <option name="timeStamp" value="155" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/src/Experiment.py</url>
-          <line>102</line>
-          <option name="timeStamp" value="162" />
+          <line>273</line>
+          <option name="timeStamp" value="183" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/src/QLearning.py</url>
-          <line>83</line>
-          <option name="timeStamp" value="163" />
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Car.py</url>
+          <line>110</line>
+          <option name="timeStamp" value="188" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/src/Environment.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="164" />
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Trajectory.py</url>
+          <line>87</line>
+          <option name="timeStamp" value="190" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/src/QLearning.py</url>
-          <line>101</line>
-          <option name="timeStamp" value="165" />
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Lane.py</url>
+          <line>94</line>
+          <option name="timeStamp" value="193" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/src/QLearning.py</url>
-          <line>45</line>
-          <option name="timeStamp" value="166" />
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Lane.py</url>
+          <line>112</line>
+          <option name="timeStamp" value="194" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Car.py</url>
+          <line>79</line>
+          <option name="timeStamp" value="196" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Trajectory.py</url>
+          <line>164</line>
+          <option name="timeStamp" value="197" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Car.py</url>
+          <line>145</line>
+          <option name="timeStamp" value="198" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/Car.py</url>
+          <line>137</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/src/trafficSimulator/LanePosition.py</url>
+          <line>51</line>
+          <option name="timeStamp" value="200" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -687,7 +693,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="167" />
+      <option name="time" value="201" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -702,10 +708,13 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/TestAni/anmi.py">
+    <entry file="file://$PROJECT_DIR$/src/QLearning.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="137" column="4" selection-start-line="137" selection-start-column="4" selection-end-line="137" selection-end-column="30" />
+          <caret line="101" column="0" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -734,7 +743,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-2.851852">
           <caret line="53" column="26" selection-start-line="53" selection-start-column="26" selection-end-line="53" selection-end-column="26" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -756,13 +764,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="1159" column="26" selection-start-line="1159" selection-start-column="26" selection-end-line="1159" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/World.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="169" selection-end-column="38" />
         </state>
       </provider>
     </entry>
@@ -913,16 +914,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Intersection.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="42" column="13" selection-start-line="42" selection-start-column="12" selection-end-line="42" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#21#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Pool.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -930,49 +921,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/LanePosition.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Road.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="72" column="11" selection-start-line="72" selection-start-column="11" selection-end-line="72" selection-end-column="11" />
-          <folding>
-            <element signature="e#0#21#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Taxi.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.82798165">
           <caret line="72" column="12" selection-start-line="72" selection-start-column="12" selection-end-line="72" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/TrafficSettings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="19" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Lane.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="57" column="0" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -980,27 +932,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-12.814815">
           <caret line="116" column="38" selection-start-line="116" selection-start-column="38" selection-end-line="116" selection-end-column="38" />
-          <folding>
-            <element signature="e#1#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Shapefile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5114679">
-          <caret line="71" column="21" selection-start-line="71" selection-start-column="21" selection-end-line="71" selection-end-column="21" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Dijkstra.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27522936">
-          <caret line="62" column="0" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1008,81 +939,35 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3440367">
           <caret line="10" column="16" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Environment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-12.925926">
-          <caret line="189" column="27" selection-start-line="189" selection-start-column="8" selection-end-line="189" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/QLearning.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.888889">
-          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="17" column="25" selection-start-line="17" selection-start-column="25" selection-end-line="17" selection-end-column="25" />
-          <folding>
-            <marker date="1454027296000" expanded="true" signature="1160:1296" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/RealMap.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-5.037037">
-          <caret line="262" column="27" selection-start-line="262" selection-start-column="8" selection-end-line="262" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/trafficSimulator/AnimatedMap.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="89" column="78" selection-start-line="89" selection-start-column="78" selection-end-line="89" selection-end-column="78" />
+        <state vertical-scroll-proportion="0.3119266">
+          <caret line="89" column="79" selection-start-line="89" selection-start-column="79" selection-end-line="89" selection-end-column="79" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Dijkstra.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.04178273">
+          <caret line="54" column="23" selection-start-line="54" selection-start-column="4" selection-end-line="54" selection-end-column="23" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Experiment.py">
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Shapefile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.111111">
-          <caret line="73" column="53" selection-start-line="73" selection-start-column="53" selection-end-line="73" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.0">
+          <caret line="71" column="21" selection-start-line="71" selection-start-column="21" selection-end-line="71" selection-end-column="21" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/trafficSimulator/ControlSignals.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-10.148149">
+        <state vertical-scroll-proportion="0.0">
           <caret line="215" column="5" selection-start-line="215" selection-start-column="5" selection-end-line="215" selection-end-column="5" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
@@ -1090,20 +975,126 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Car.py">
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Intersection.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-5.5925927">
-          <caret line="50" column="5" selection-start-line="50" selection-start-column="5" selection-end-line="50" selection-end-column="5" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="36" column="0" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/QLearning.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="71" column="0" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/World.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.9860724">
+          <caret line="130" column="8" selection-start-line="130" selection-start-column="8" selection-end-line="130" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Environment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.5185184">
+          <caret line="162" column="0" selection-start-line="162" selection-start-column="0" selection-end-line="162" selection-end-column="0" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/TrafficSettings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5849582">
+          <caret line="14" column="24" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/LanePosition.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.44846797">
+          <caret line="53" column="31" selection-start-line="53" selection-start-column="22" selection-end-line="53" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Car.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-28.407408">
+          <caret line="113" column="17" selection-start-line="113" selection-start-column="17" selection-end-line="113" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="11" column="11" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Trajectory.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="4.476773">
-          <caret line="232" column="25" selection-start-line="232" selection-start-column="8" selection-end-line="232" selection-end-column="25" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="143" column="8" selection-start-line="143" selection-start-column="8" selection-end-line="143" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Lane.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="50" selection-start-line="14" selection-start-column="50" selection-end-line="14" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/RealMap.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="175" column="29" selection-start-line="175" selection-start-column="8" selection-end-line="175" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/trafficSimulator/Road.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.0">
+          <caret line="76" column="38" selection-start-line="76" selection-start-column="38" selection-end-line="76" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
+          <folding>
+            <marker date="1454563819000" expanded="true" signature="1160:1296" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Experiment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.69124424">
+          <caret line="73" column="51" selection-start-line="73" selection-start-column="51" selection-end-line="73" selection-end-column="51" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

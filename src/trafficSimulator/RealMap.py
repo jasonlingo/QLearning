@@ -190,10 +190,14 @@ class RealMap(object):
     def getGoalLanePosition(self):
         return self.goalLocation
 
-    def clearTaxis(self):
+    def cleanTaxis(self):
+        for taxi in self.taxis.values():
+            taxi.release()
         self.taxis = {}
 
-    def clearCars(self):
+    def cleanCars(self):
+        for car in self.cars.values():
+            car.release()
         self.cars = {}
 
     def addRandomCars(self, num):

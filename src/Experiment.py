@@ -6,7 +6,7 @@ from QLearning import QLearning
 import math
 import time
 from Queue import PriorityQueue
-from Dijkstra import dijkstraSearch
+from Dijkstra import dijkstraSearch, dijkstraTrafficTime
 import random
 
 
@@ -37,12 +37,16 @@ class Experiment(object):
         self.calledTaxiQL = []   # contains q-learning agents for called taxis
         self.allTaxis = []       # contains all taxis
 
-        # Q value lookup dictionary
-        # {((x, y), action): Q value}
+        # Q value lookup dictionary for route discovery
+        # {(state, action): Q value}
         self.qvalue = {}
 
         # Record the visited times for state-action
         self.nsa = {}
+
+        # Q value lookup dictionary for dispatching planning
+        self.dipatchQvalue = {}
+        self.dispatchNsa = {}
 
         self.iteration = 0
         self.plotMap = False
@@ -59,27 +63,25 @@ class Experiment(object):
         self.iteration += 1
         cnt = 0
         preTime = time.time()
+        lastCallTime = 0
+
         while not self.env.isGoalReached():
             cnt += 1
-            if cnt % 100 == 0:
+            if cnt % 1000 == 0:
                 print ".",
-                if cnt % 8000 == 0: print ""
+                if cnt % 80000 == 0: print ""
 
-            # Call the fastest taxi in every iteration. If any non-called taxis
-            # will be faster than the called taxis, the taxi will be returned.
-            # Otherwise, it return None.
-            # interval = min((time.time() - preTime) * 50, 100)
-            # interval = min((time.time() - preTime) * 5, 200)
-            # interval = random.random() * 100 + 100
-            interval = (time.time() - preTime) * 1000
-            print "interval", interval
+            interval = (time.time() - preTime) * 10
             preTime = time.time()
-            # interval = 100
 
-            if not self.calledTaxiQL:
+            # if not self.calledTaxiQL:
+            lastCallTime += interval
+            if lastCallTime > 180 or not self.calledTaxiQL:
                 taxi = self.findFastestTaxi()
-                if taxi is not None:
-                    self.callTaxi(taxi)
+                if taxi is not None and taxi in self.taxiList:
+                    if self.isQuicker(taxi, 120):  # 2 minutes quicker
+                        self.callTaxi(taxi)
+                lastCallTime = 0
 
             # perform Q learning for called taxis
             for ql in self.calledTaxiQL:
@@ -88,9 +90,6 @@ class Experiment(object):
             for taxi in self.taxiList:
                 taxi.move(interval)
                 # taxi.setRandomAvailable()
-
-            # for taxi in self.calledTaxi:  # already put in the ql.go()
-            #     taxi.move(interval * 5)
 
             for car in self.env.getCars().values():
                 car.move(interval)  # convert millisecond to second
@@ -145,17 +144,16 @@ class Experiment(object):
         """
         Initialize taxis, calledTaxi list and the reachGoal flag of the environment.
         """
-        self.env.clearCars()
-        self.env.clearTaxis()
+        self.env.cleanCars()
+        self.env.cleanTaxis()
+
         self.env.addRandomCars(self.carNum)
         self.env.addRandomTaxis(self.taxiNum)
         self.taxiList = self.env.getTaxis().values()
-
+        self.allTaxis = self.taxiList[:]
         self.calledTaxiQL = []
-
         self.env.setReachGoal(False)
         self.setResetFlag(False)  # Tell the animated map to start plotting cars and taxis
-
 
     def setResetFlag(self, b):
         """
@@ -244,8 +242,8 @@ class Experiment(object):
         goal = self.env.getGoalLocation()  # a Trajectory object
         targetInter = goal.current.lane.road.getTarget()
         sourceInter = goal.current.lane.road.getSource()
-        taxi1, time1 = dijkstraSearch(self.env.realMap, sourceInter, self.taxiList)
-        taxi2, time2 = dijkstraSearch(self.env.realMap, targetInter, self.taxiList)
+        taxi1, time1 = dijkstraSearch(self.env.realMap, sourceInter, self.allTaxis)
+        taxi2, time2 = dijkstraSearch(self.env.realMap, targetInter, self.allTaxis)
         return taxi1 if time1 < time2 else taxi2
 
     def callTaxi(self, taxi):
@@ -260,8 +258,30 @@ class Experiment(object):
         ql = QLearning(taxi, self.env, self.qvalue, self.nsa, self.getEpsilon())
         self.calledTaxiQL.append(ql)
         self.taxiList.remove(taxi)
-
+        print ""
+        print "Called", taxi.id
         # print "call taxi no." + str(taxi.getId())
+
+    def isQuicker(self, taxi, second):
+        """
+        Check the time for this given taxi to the goal location is "second" quicker than other called taxis.
+        :param taxi: Taxi
+        :param second: int
+        :return: Boolean
+        """
+        if not self.calledTaxiQL: return True
+
+        times = []
+        goalRoad = self.goalLocation.current.lane.road
+        goals = [goalRoad.getTarget(), goalRoad.getSource()]
+        for ql in self.calledTaxiQL:
+            taxiInter = ql.taxi.trajectory.current.lane.road.getTarget()
+            times.append(dijkstraTrafficTime(self.env.realMap, taxiInter, goals))
+        taxiInter = taxi.trajectory.current.lane.road.getTarget()
+        timeForGivenTaxi = dijkstraTrafficTime(self.env.realMap, taxiInter, goals)
+        for time in times:
+            if time < timeForGivenTaxi: return False
+        return True
 
     def getEpsilon(self):
         """

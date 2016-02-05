@@ -6,7 +6,7 @@
 EXP_NUM = 30000
 
 # The total number of taxis in the system
-TAXI_NUM = 2
+TAXI_NUM = 20
 
 # The total number of cars in the system
 CAR_NUM = 20

@@ -69,7 +69,7 @@ def dijkstraTrafficTime(graph, start, goals):
 
     while not frontier.empty():
         current = frontier.get()
-        if current in goals:
+        if current in goals:  # FIXME: add lane position
             return costSoFar[current]
             break
 
