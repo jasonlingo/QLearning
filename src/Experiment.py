@@ -71,7 +71,7 @@ class Experiment(object):
                 print ".",
                 if cnt % 80000 == 0: print ""
 
-            interval = (time.time() - preTime) * 10
+            interval = (time.time() - preTime) * 20
             preTime = time.time()
 
             # if not self.calledTaxiQL:

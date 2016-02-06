@@ -25,14 +25,29 @@ if __name__ == '__main__':
         # experiment.printNSA()
         # experiment.showMap()
 
+    def updateSignal():
+        """
+        update the traffic signal of each intersection according to the given time interval.
+        :param time: (int) second
+        """
+        print "updating signals"
+        signalInterval = 1
+        env.updateContralSignal(signalInterval)
+        time.sleep(signalInterval)
+
     # Create a RealMap object and pass it to a Environment object.
     # Start a new thread that runs the learning process.
     realMap = RealMap(SHAPEFILE)
     env = Environment(realMap)
     exp = Experiment(env, TAXI_NUM, CAR_NUM, epsilon=EPSILON, alpha=ALPHA, gamma=GAMMA)
     # runExp()
-    t = threading.Thread(target=runExp)
-    t.start()
+
+    # Simulation thread
+    simulation = threading.Thread(target=runExp)
+    simulation.start()
+    # signal updating thread
+    # signalThread = threading.Thread(target=updateSignal)
+    # signalThread.start()
 
     # plot the animated map
     fig, ax = plt.subplots(figsize=(10, 8))

@@ -33,8 +33,6 @@ class Road(object):
         self.setLength()
         self.targetSide = None
         self.sourceSide = None
-        # self.targetSideId = None
-        # self.sourceSideId = None
         self.targetSideId = 0 #fixme
         self.sourceSideId = 0
         self.update()

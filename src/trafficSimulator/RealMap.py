@@ -65,18 +65,14 @@ class RealMap(object):
                         rd.setSource(inter)  # FIXME: reduce some distance for intersection?
                     elif not rd.getTarget():
                         rd.setTarget(inter)
-                        # print "target inter add in rd", rd.id
                         inter.addInRoad(rd)
                         self.roads[rd.id] = rd
                         sourceInter = rd.getSource()
-                        # print "source inter add out rd", rd.id
                         sourceInter.addRoad(rd)
 
                         # add a road for opposite direction
                         opRd = Road(rd.corners, rd.center, rd.getTarget(), rd.getSource())
-                        # print "target inter add op out rd", opRd.id
                         inter.addRoad(opRd)
-                        # print "source inter add op in rd", opRd.id
                         sourceInter.addInRoad(opRd)
                         self.roads[opRd.id] = opRd
                         if sourceInter.getRoads() and sourceInter.getInRoads() and sourceInter.id not in self.intersections:
@@ -180,6 +176,7 @@ class RealMap(object):
         :return:
         """
         lane, position = self.randomLaneLocation()
+        lane.road.setAvgSpeed(20)  # reduce the speed of the road on which a car accident is located
         self.goalLocation = Trajectory(None, lane, position)
         self.goalLocation.setGoal()
         return self.goalLocation
