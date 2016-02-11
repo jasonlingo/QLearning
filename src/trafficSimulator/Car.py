@@ -28,6 +28,9 @@ class Car(object):
         self.preferedLane = None
         self.isTaxi = False
 
+    def __eq__(self, other):
+        self.id == other.id
+
     def getCoords(self):
         """
         Return the coordinates of this car.

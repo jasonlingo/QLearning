@@ -58,6 +58,8 @@ class AnimatedMap(threading.Thread):
                     xs = [source.center.lng, target.center.lng]
                     ys = [source.center.lat, target.center.lat]
                     plt.plot(xs, ys, color='k')
+                else:
+                    print "a road is incomplete"
 
             # initialize markers for cars, taxis, and the goal location
             self.carPoints, = ax.plot([], [], 'bo', ms=4)

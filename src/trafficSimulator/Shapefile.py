@@ -115,7 +115,7 @@ class Shapefile(object):
     def getBoard(self):
         return self.top, self.bot, self.right, self.left
 
-    def plotMap(self, intersections, roads, interCheck, roadCheck):
+    def plotMap(self, intersections, roads, interCheck=[], roadCheck=[]):
         print "Total points:", len(intersections) + len(roads)
         if not intersections and not roads:
             print "not points to plot"
@@ -143,6 +143,6 @@ class Shapefile(object):
 # For checking the correctness
 # =========================================================
 # sh = Shapefile("/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf")
-# inter, interCheck = sh.getIntersections()
-# roads, roadCheck = sh.getRoads()
-# sh.plotMap(inter, roads, interCheck, roadCheck)
+# inter = sh.getIntersections()
+# roads = sh.getRoads()
+# sh.plotMap(inter.values(), roads.values())

@@ -6,10 +6,10 @@
 EXP_NUM = 30000
 
 # The total number of taxis in the system
-TAXI_NUM = 0
+TAXI_NUM = 10
 
 # The total number of cars in the system
-CAR_NUM = 0
+CAR_NUM = 20
 
 # The threshold of time (minute) for the system to call a new taxi that
 # might arrive the goal location with shorter time.
