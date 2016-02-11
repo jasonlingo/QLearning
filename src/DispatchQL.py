@@ -1,13 +1,12 @@
-import random
-import sys
-import Settings
+from QLearning import QLearning
 
-class QLearning(object):
+
+class DispatchQL(QLearning):
     """
-    A Q-learning model.
+    A Q-learning algorithm for learning dispatching policy
     """
 
-    def __init__(self, taxi, environment, qvalue={}, nsa={}, epsilon=0.1, alpha=0.1, gamma=0.9):
+    def __init__(self, traffic, environment, qvalue={}, nsa={}, epsilon=0.1, alpha=0.1, gamma=0.9):
         """
         Args:
             taxi: the assigned taxi
@@ -19,7 +18,7 @@ class QLearning(object):
             gamma: discounting factor
         Returns:
         """
-        self.taxi = taxi
+        self.traffic = traffic
         self.env = environment
         self.epsilon = epsilon
         self.alpha = alpha

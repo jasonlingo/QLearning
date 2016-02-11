@@ -63,7 +63,7 @@ class Shapefile(object):
         print "Loading", roadType,
         i = 0
         result = {}
-        for sh in self.ctr.iterShapeRecords():
+        for sh in self.ctr.iterShapeRecords():  # total 52339 records
             i += 1
             if i % 10000 == 0:
                 print ".",
@@ -74,20 +74,16 @@ class Shapefile(object):
                 lnts = [p[0] for p in sh.shape.points]
                 centerLats = sum(lats) / float(len(lats)) if len(lats) > 0 else None
                 centerLnts = sum(lnts) / float(len(lnts)) if len(lnts) > 0 else None
-                # center = (centerLats, centerLnts)
                 center = Coordinate(centerLnts, centerLats)
 
-                # For checking correctness
-                # if centerLats and centerLnts:
-                #     data.append(center)
-
-                # Find the top, bottom, right, and left of this map
                 maxLat, minLat = max(lats), min(lats)
                 maxLnt, minLnt = max(lnts), min(lnts)
                 corners = [Coordinate(p[1], p[0]) for p in sh.shape.points if p[1] == maxLat or\
                                                                               p[1] == minLat or\
                                                                               p[0] == maxLnt or\
                                                                               p[0] == minLnt]
+
+                # Find the top, bottom, right, and left of this map
                 if self.top < maxLat:
                     self.top = maxLat
                 if self.right < maxLnt:
@@ -97,16 +93,9 @@ class Shapefile(object):
                 if not self.left or self.left > minLnt:
                     self.left = minLnt
 
-                # corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[1] == minLat][0]))
-                # corners.extend(tuple([(p[1], p[0]) for p in sh.shape.points if p[0] == maxLnt][0]))
-                # corners.append(tuple([(p[1], p[0]) for p in sh.shape.points if p[0] == minLnt][0]))
+                rdInter = self.makeRoads(roadType, corners, center)
+                result[rdInter.id] = rdInter
 
-                # For checking correctness
-                # check.extend(corners)
-
-                rd = self.makeRoads(roadType, corners, center)
-                result[rd.id] = rd
-        # return data, check
         print ""
         return result
 
@@ -126,7 +115,7 @@ class Shapefile(object):
     def getBoard(self):
         return self.top, self.bot, self.right, self.left
 
-    def plotMap(self, intersections, roads, interCheck, roadCheck):
+    def plotMap(self, intersections, roads, interCheck=[], roadCheck=[]):
         print "Total points:", len(intersections) + len(roads)
         if not intersections and not roads:
             print "not points to plot"
@@ -154,6 +143,6 @@ class Shapefile(object):
 # For checking the correctness
 # =========================================================
 # sh = Shapefile("/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf")
-# inter, interCheck = sh.getIntersections()
-# roads, roadCheck = sh.getRoads()
-# sh.plotMap(inter, roads, interCheck, roadCheck)
+# inter = sh.getIntersections()
+# roads = sh.getRoads()
+# sh.plotMap(inter.values(), roads.values())

@@ -1,4 +1,3 @@
-# from random import shuffle, choice
 import random
 from math import radians, cos, sin, asin, sqrt
 from TrafficSettings import *

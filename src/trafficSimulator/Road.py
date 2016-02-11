@@ -8,14 +8,14 @@ class Road(object):
     A class that represents a road. It will connect to intersections and contain lanes.
     """
 
-    def __init__(self, corners, center, source, target, avgSpeed=40):
+    def __init__(self, corners, center, source, target, speed=40):
         """
         Create a road that start form the source intersection to the destination intersection.
         :param corners: the four points of the road from the shapefile
         :param center: the average coordinates of this road
         :param source: the source intersection
         :param target: the target intersection
-        :param avgSpeed: the average speed of this road
+        :param speed: the average speed of this road
         """
         self.corners = corners
         self.center = center
@@ -23,17 +23,16 @@ class Road(object):
         self.target = target
 
         self.top, self.bottom, self.right, self.left = self.parseCorners(corners)
-        self.avgSpeed = avgSpeed
+        self.defaultSpeed = speed
+        self.avgSpeed = speed
+        self.recentSpeedList = [speed]
         self.id = Traffic.uniqueId(RoadType.ROAD)
-        # self.connectedIntersections = []
         self.lanes = []
         self.lanesNumber = None
         self.length = None
         self.setLength()
         self.targetSide = None
         self.sourceSide = None
-        # self.targetSideId = None
-        # self.sourceSideId = None
         self.targetSideId = 0 #fixme
         self.sourceSideId = 0
         self.update()
@@ -51,6 +50,36 @@ class Road(object):
         maxLnt = max(lnts)
         minLnt = min(lnts)
         return maxLat, minLat, maxLnt, minLnt
+
+    def getCurAvgSpeed(self):
+        """
+        Calculate the average speed from all the cars in this road. If there is no car in this road, then return
+        the default speed of this road.
+        :return: the average speed (km/h)
+        """
+        carPosition = []
+        for lane in self.lanes:
+            carPosition.extend(lane.carsPosition.values())
+        cars = [cp.car for cp in carPosition if cp.car is not None]
+        avgSpeed = sum([car.speed for car in cars]) / len(cars) if len(cars) > 0 else self.defaultSpeed
+        return avgSpeed
+
+    def updateAvgSpeed(self):
+        """
+        Calculate the average speed of the recent speed data (at most 50 records) of this road.
+        Then set the result to self.avgSpeed.
+        """
+        print "update avg speed:", self.id, self.avgSpeed, "->",
+        curAvgSpeed = self.getCurAvgSpeed()
+        if self.recentSpeedList >= 50:
+            self.recentSpeedList.pop()
+        self.recentSpeedList.append(curAvgSpeed)
+        self.avgSpeed = sum(self.recentSpeedList) / len(self.recentSpeedList)
+        print self.avgSpeed
+
+
+    def getAvgSpeed(self):
+        return max(self.avgSpeed, 1.0)
 
     def setLength(self):
         """
@@ -102,8 +131,9 @@ class Road(object):
         return self.target
 
     def getLength(self):
-        if self.length:
-            return self.length
+        if not self.length:
+            self.setLength()
+        return self.length
 
     def getTurnDirection(self, other):
         """

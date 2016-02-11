@@ -1,6 +1,10 @@
 import math
 from trafficSimulator.RealMap import RealMap
 from QLEnvironment import QLEnvironment
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from Settings import *
 
 
 class Environment(QLEnvironment):
@@ -24,7 +28,7 @@ class Environment(QLEnvironment):
         #       "roadId=", self.goalLocation.roadId, \
         #       "intersectionId=", self.goalLocation.intersId
 
-        self.goalLocation = self.realMap.getGoalLanePosition()
+        self.goalLocation = self.realMap.getGoalLanePosition()  # Trajectory object
         self.reachGoal = False
         self.cars = {}
         self.taxis = {}
@@ -48,7 +52,7 @@ class Environment(QLEnvironment):
     def getAction(self, pos):
         """
         Get the available actions for the given position.
-        :param pos: lane, position
+        :param pos: LanePosition
         :return: a list of actions
         """
         return self.realMap.getAction(pos)
@@ -58,18 +62,18 @@ class Environment(QLEnvironment):
         Return the Goal reward if the given position is the goal location.
         Otherwise, return the reward for non-goal position-action
         Args:
-            pos: the position
-            action: the action taken in the position
+            pos: Road
+            action: Road
         Returns:
             the corresponding reward
         """
         if self.checkArriveGoal(pos):
-            return Settings.GOAL_REWARD
+            return GOAL_REWARD
 
         # TODO: modelizing
         #reward = 0.0
         # =================
-        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation, action))
+        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation.current.lane.road)/100.0)
         # =================
         return reward
 
@@ -130,15 +134,24 @@ class Environment(QLEnvironment):
         Check whether the position reaches the goal position. If the given position is
         within the goal +/- 0.2 unit distance, then it reaches the goal location.
         Args:
-            pos: the given position
+            pos: Road
         Returns:
             True: if the position is reaching the goal location;
             False: otherwise
         """
-        if abs(self.goalLocation[0] - pos[0]) < 0.2 and abs(self.goalLocation[1] - pos[1]) < 0.2:
+        # if abs(self.goalLocation[0] - pos[0]) < 0.2 and abs(self.goalLocation[1] - pos[1]) < 0.2:
+        #     return True
+        # else:
+        #     return False
+        goalRoad = self.goalLocation.current.lane.road
+        goalInters = [goalRoad.getTarget(), goalRoad.getSource()]  # two intersections connecting to this road
+        if pos.getTarget() in goalInters:
             return True
-        else:
-            return False
+        if pos.getSource() in goalInters:
+            return True
+        return False
+        # if pos.lane == self.goalLocation.current.lane:
+        #     return True
 
     def addRandomCars(self, num):
         self.realMap.addRandomCars(num)
@@ -148,12 +161,12 @@ class Environment(QLEnvironment):
         self.realMap.addRandomTaxi(num)
         self.taxis = self.realMap.getTaxis()
 
-    def clearCars(self):
-        self.realMap.clearCars()
+    def cleanCars(self):
+        self.realMap.cleanCars()
         self.cars = None
 
-    def clearTaxis(self):
-        self.realMap.clearTaxis()
+    def cleanTaxis(self):
+        self.realMap.cleanTaxis()
         self.taxis = None
 
     def getCars(self):
@@ -173,3 +186,6 @@ class Environment(QLEnvironment):
 
     def isAniMapPlotOk(self):
         return self.realMap.isAniMapPlotOk()
+
+    def updateContralSignal(self, delta):
+        self.realMap.updateContralSignal(delta)

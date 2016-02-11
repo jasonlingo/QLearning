@@ -12,6 +12,7 @@ class Lane(object):
         Construct a lane for the road
         :param road: the road that this lane belongs to
         """
+        # TODO: move speed parameter to class Lane?
         self.road = road
         self.source = road.source
         self.target = road.target
@@ -93,15 +94,23 @@ class Lane(object):
         """
         if carPos.lane != self:
             print "car is on other lane"
-            return
-        next = None
+            return []
+        next = []
         shortestDist = sys.maxint
         for car in self.carsPosition.itervalues():
+            if car.isGoalFlag:
+                next.append(car)
+                continue
             if car.position is None:
                 print "the car has no position"
+                continue
+            if car.car.id == carPos.car.id:
+                continue
             distance = car.position - carPos.position
-            if not car.free and (0 < distance < shortestDist):
+            if not car.free and (0 < distance < shortestDist):  # only pick the cars in front of current car
                 shortestDist = distance
-                next = car
+                next.append(car)
         return next
 
+    def getCars(self):
+        return [cp.car for cp in self.carsPosition.values()]
