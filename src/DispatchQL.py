@@ -7,7 +7,7 @@ class DispatchQL(QLearning):
     A Q-learning algorithm for learning dispatching policy
     """
 
-    def __init__(self, allTaxis, availableTaxis, environment, qvalue, nsa, experiment, epsilon=0.1, alpha=0.1, gamma=0.9):
+    def __init__(self, exp, environment, epsilon=0.1, alpha=0.1, gamma=0.9):
         """
         Args:
             taxis      : all taxis on the environment
@@ -19,20 +19,19 @@ class DispatchQL(QLearning):
             gamma      : discounting factor
         Returns:
         """
-        self.allTaxis = allTaxis
+        self.experiment = exp
         self.availableTaxis = availableTaxis
         self.env = environment
-        self.experiment = experiment
-        self.epsilon = epsilon
+        self.epsilon =
         self.alpha = alpha
         self.gamma = gamma
 
         # Q value lookup dictionary
         # {((x, y), action): Q value}
-        self.qvalue = qvalue
+        self.qvalue = {}
 
         # record the visited times for state-action
-        self.nsa = nsa
+        self.nsa = {}
 
         # for checking oscillation
         self.steps = []
@@ -82,7 +81,7 @@ class DispatchQL(QLearning):
             self.learn(oldState, action, reward, nextState)
 
     def getState(self):
-        return sorted([taxi.trajectory.current.lane.road.id for taxi in self.allTaxis if taxi.isAvailable() or taxi.isCalled()])
+        return sorted([taxi.trajectory.current.lane.road.id for taxi in self.exp.allTaxis if taxi.isAvailable() or taxi.isCalled()])
 
     def getActions(self):
         pass

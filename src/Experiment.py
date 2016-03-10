@@ -40,18 +40,16 @@ class Experiment(object):
         # Q value lookup dictionary for route discovery
         # {(state, action): Q value}
         self.qvalue = {}
-        self.qvalueDispatch = {}
 
         # Record the visited times for state-action
         self.nsa = {}
-        self.nsaDispatch = {}
 
         # Q value lookup dictionary for dispatching planning
         self.dipatchQvalue = {}
         self.dispatchNsa = {}
 
         # a Q-Learning model for dispatching policy
-        self.dispatchQL = DispatchQL(self.allTaxis, self.taxiList, self.env, self.qvalueDispatch, self.nsaDispatch, self)
+        self.dispatchQL = DispatchQL(self, self.env)
 
 
         self.iteration = 0
