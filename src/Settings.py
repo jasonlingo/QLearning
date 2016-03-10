@@ -37,6 +37,9 @@ ALPHA = 0.2
 # The discounting factor
 GAMMA = 0.8
 
+# time threshold (seconds) for calling another taxi
+CHECK_INTERVAL = 120
+
 
 # ===============================================
 # Discarded settings

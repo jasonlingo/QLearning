@@ -1,75 +1,102 @@
 from QLearning import QLearning
-
+import random
+from Settings import CHECK_INTERVAL
 
 class DispatchQL(QLearning):
     """
     A Q-learning algorithm for learning dispatching policy
     """
 
-    def __init__(self, traffic, environment, qvalue={}, nsa={}, epsilon=0.1, alpha=0.1, gamma=0.9):
+    def __init__(self, exp, environment, epsilon=0.1, alpha=0.1, gamma=0.9):
         """
         Args:
-            taxi: the assigned taxi
+            taxis      : all taxis on the environment
             environment: the environment for this Q learning to interact with
-            qvalue: Q-value table
-            nsa: the table records the times of each state that has been reached
-            epsilon: a exploration parameter
-            alpha: learning rate
-            gamma: discounting factor
+            qvalue     : Q-value table
+            nsa        : the table records the times of each state that has been reached
+            epsilon    : a exploration parameter
+            alpha      : learning rate
+            gamma      : discounting factor
         Returns:
         """
-        self.traffic = traffic
+        self.experiment = exp
+        self.availableTaxis = availableTaxis
         self.env = environment
-        self.epsilon = epsilon
+        self.epsilon =
         self.alpha = alpha
         self.gamma = gamma
 
         # Q value lookup dictionary
         # {((x, y), action): Q value}
-        self.qvalue = qvalue
+        self.qvalue = {}
 
         # record the visited times for state-action
-        self.nsa = nsa
+        self.nsa = {}
 
         # for checking oscillation
         self.steps = []
 
-    def go(self, second):
+        # record data for one trial
+        self.stateAction = {}
+        self.trialTime = 0
+        self.taxiTrafficTime = {}
+
+    def go(self, interval):
         """
         Perform learning procedure.
+        action: a nearest taxi
+        state: the taxis' position (by road id)
+        :param interval: second
         """
-        oldPos = self.taxi.getPosition().lane.road
+        self.addTime(interval)
 
-        # already at the same road with the goal location
-        if self.env.checkArriveGoal(oldPos):
-            self.env.setReachGoal(True)
-            reward = self.env.getReward(oldPos, oldPos)
-            self.learn(oldPos, oldPos, reward, oldPos)
+        oldState = self.getState()     # list all the available taxis' positions
+        action = self.chooseAction()   #
+
+        taxi, trafficTime = self.experiment.findFastestTaxi()
+        if not self.experiment.isQuicker(taxi, CHECK_INTERVAL):
+            taxi = None
+
+        # self.stateAction[(tuple(oldState), action)] = self.trialTime  # the time for the chosen taxi to arrive the goal location after this action is called
+        if taxi not in self.taxiTrafficTime:
+            self.taxiTrafficTime[taxi] = trafficTime
+
+        # goal already reached
+        if self.env.isGoalReached():
+            reward = self.getReward()
+            self.learn(oldState, None, reward, oldState)
+            self.resetTrial()
             return
 
-        action = self.chooseAction(oldPos)  # road
-        self.taxi.setNextLane(action.lanes[0])
-        self.taxi.move(second)
-        nextPos = self.taxi.getPosition().lane.road  # current road
+        nextState = self.getState()
 
-        # nextPos = self.env.nextPos(self.taxi, action)
-        # TODO
-        # minus = 0
-        # if (self.env.map.findRoad(oldPos), action) in self.nsa:
-        #     minus = self.nsa[(self.env.map.findRoad(oldPos), action)] * 0.1
-        # reward = self.env.getReward(nextPos, action) - minus
-        if oldPos != nextPos:
-            reward = self.env.getReward(nextPos, action)
+        if oldState != nextState:
+            reward = self.env.getReward(nextState, action)
 
-            self.steps.append(nextPos)
-            if self.steps.count(nextPos) > 1000:
-                print "Oscillation at: ", nextPos, " => ", self.steps.count(nextPos)
+            self.steps.append(nextState)
+            if self.steps.count(nextState) > 1000:
+                print "Oscillation at: ", nextState, " => ", self.steps.count(nextState)
 
             # self.taxi.setPosition(nextPos)
-            self.learn(oldPos, action, reward, nextPos)
+            self.learn(oldState, action, reward, nextState)
 
-        if self.env.checkArriveGoal(nextPos):
-            self.env.setReachGoal(True)
+    def getState(self):
+        return sorted([taxi.trajectory.current.lane.road.id for taxi in self.exp.allTaxis if taxi.isAvailable() or taxi.isCalled()])
+
+    def getActions(self):
+        pass
+
+    def getReward(self):
+        # if self.env.isGoalReached():
+        pass
+        return  # TODO
+
+    def addTime(self, second):
+        self.trialTime += second
+
+    def resetTrial(self):
+        self.trialTime = 0
+        self.stateAction = {}
 
     def learn(self, state1, action1, reward, state2):
         """
@@ -80,13 +107,8 @@ class DispatchQL(QLearning):
             state2: (road)
         Returns:
         """
-        actions = self.env.getAction(state2)
-        # state1 = self.env.map.findRoad(state1)
-        # state2 = self.env.map.findRoad(state2)
-
-        # maxqnew = max([self.getQValue(state2, a) for a in actions])
+        actions = self.getActions()
         maxqnew = max([self.qvalue.get((state2, a), 0.0) for a in actions])
-        # self.updateQValue(state1, action1, reward, reward + self.gamma * maxqnew)
         self.updateQValue(state1, action1, reward, maxqnew)
 
     def updateQValue(self, state, action, reward, maxqnew):
@@ -113,11 +135,9 @@ class DispatchQL(QLearning):
         Returns:
             a chosen action
         """
-        actions = self.env.getAction(state)  # roads
-
         if random.random() < self.epsilon:
             # print "@",
-            action = random.choice(actions)  # exploration
+            action = random.choice(self.taxis)  # exploration
         else:
             beenPos = False
             # for a in actions: # FIXME
@@ -149,17 +169,6 @@ class DispatchQL(QLearning):
             #             fastestTime = time
             #             action = a
         return action
-
-    # def getQValue(self, state, action):
-    #     """
-    #
-    #     Args:
-    #         state: (x, y)
-    #         action: the chosen action
-    #     Returns:
-    #         the state-action Q value
-    #     """
-    #     return self.qvalue.get((state, action), 0.0)  # if the key cannot be found, return 0.0
 
     def getTaxi(self):
         return self.taxi

@@ -82,12 +82,7 @@ class QLearning(object):
         Returns:
         """
         actions = self.env.getAction(state2)
-        # state1 = self.env.map.findRoad(state1)
-        # state2 = self.env.map.findRoad(state2)
-
-        # maxqnew = max([self.getQValue(state2, a) for a in actions])
         maxqnew = max([self.qvalue.get((state2, a), 0.0) for a in actions])
-        # self.updateQValue(state1, action1, reward, reward + self.gamma * maxqnew)
         self.updateQValue(state1, action1, reward, maxqnew)
 
     def updateQValue(self, state, action, reward, maxqnew):
@@ -151,16 +146,6 @@ class QLearning(object):
             #             action = a
         return action
 
-    # def getQValue(self, state, action):
-    #     """
-    #
-    #     Args:
-    #         state: (x, y)
-    #         action: the chosen action
-    #     Returns:
-    #         the state-action Q value
-    #     """
-    #     return self.qvalue.get((state, action), 0.0)  # if the key cannot be found, return 0.0
 
     def getTaxi(self):
         return self.taxi
