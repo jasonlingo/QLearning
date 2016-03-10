@@ -77,46 +77,6 @@ class Environment(QLEnvironment):
         # =================
         return reward
 
-    # def nextPos(self, taxi, action):
-        # x, y = taxi.getPosition()
-        #
-        # subR = self.map.searchSubRegion((x, y))
-        # speedMu = subR.getSpeed() if subR else 50
-        #
-        # speedSigmaLimit = 5.0
-        #
-        # speed = random.gauss(speedMu, speedSigmaLimit)
-        # if speed > speedMu + speedSigmaLimit:
-        #     speed = speedMu + speedSigmaLimit
-        # elif speed < speedMu - speedSigmaLimit:
-        #     speed = speedMu - speedSigmaLimit
-        #
-        # dist = speed * Settings.UNIT_TIME
-        #
-        # if action == Settings.EAST:
-        #     x = min(x + dist, math.floor(x+1))
-        #     y = self.calibrateCoordinate(y)
-        # elif action == Settings.WEST:
-        #     x = max(x - dist, math.ceil(x-1))
-        #     y = self.calibrateCoordinate(y)
-        # elif action == Settings.NORTH:
-        #     y = min(y + dist, math.floor(y+1))
-        #     x = self.calibrateCoordinate(x)
-        # else:
-        #     y = max(y - dist, math.ceil(y-1))
-        #     x = self.calibrateCoordinate(x)
-        #
-        # return x, y
-
-    # def calibrateCoordinate(self, num):
-    #     if num >= math.ceil(num) - 0.2:
-    #         num = math.ceil(num)
-    #     elif num <= math.floor(num) + 0.2:
-    #         num = math.floor(num)
-    #     else:
-    #         print "wrong coordinate: ", num
-    #     return num
-
     def setReachGoal(self, newBool):
         self.reachGoal = newBool
 
@@ -139,10 +99,6 @@ class Environment(QLEnvironment):
             True: if the position is reaching the goal location;
             False: otherwise
         """
-        # if abs(self.goalLocation[0] - pos[0]) < 0.2 and abs(self.goalLocation[1] - pos[1]) < 0.2:
-        #     return True
-        # else:
-        #     return False
         goalRoad = self.goalLocation.current.lane.road
         goalInters = [goalRoad.getTarget(), goalRoad.getSource()]  # two intersections connecting to this road
         if pos.getTarget() in goalInters:
@@ -150,8 +106,6 @@ class Environment(QLEnvironment):
         if pos.getSource() in goalInters:
             return True
         return False
-        # if pos.lane == self.goalLocation.current.lane:
-        #     return True
 
     def addRandomCars(self, num):
         self.realMap.addRandomCars(num)

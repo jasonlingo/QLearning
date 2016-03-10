@@ -29,7 +29,10 @@ class Car(object):
         self.isTaxi = False
 
     def __eq__(self, other):
-        self.id == other.id
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def getCoords(self):
         """
@@ -238,7 +241,6 @@ class Taxi(Car):
         self.destPosition = None
         self.called = False
         self.isTaxi = True
-        # self.source = None
 
     def setDestination(self, destination):
         """
@@ -265,7 +267,7 @@ class Taxi(Car):
         if self.available or haversine(self.source, self.getCurLocation()) >= 1:  # 1 km
             if random.random() > 0.5:  #TODO: need to choose a better threshold?
                 self.available = not self.available
-                self.setSource(self.getCurLocation())
+                # self.setSource(self.getCurLocation())
 
     def setAvailable(self, avail):
         self.available = avail
@@ -281,6 +283,9 @@ class Taxi(Car):
         self.destRoad = road
         self.destLane = lane
         self.destPosition = position
+
+    def isCalled(self):
+        return self.called
 
     def setNextLane(self, nextLane):
         self.nextLane = nextLane

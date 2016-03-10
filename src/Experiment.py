@@ -7,8 +7,8 @@ import math
 import time
 from Queue import PriorityQueue
 from Dijkstra import dijkstraSearch, dijkstraTrafficTime
+from DispatchQL import DispatchQL
 import random
-
 
 
 class Experiment(object):
@@ -40,13 +40,19 @@ class Experiment(object):
         # Q value lookup dictionary for route discovery
         # {(state, action): Q value}
         self.qvalue = {}
+        self.qvalueDispatch = {}
 
         # Record the visited times for state-action
         self.nsa = {}
+        self.nsaDispatch = {}
 
         # Q value lookup dictionary for dispatching planning
         self.dipatchQvalue = {}
         self.dispatchNsa = {}
+
+        # a Q-Learning model for dispatching policy
+        self.dispatchQL = DispatchQL(self.allTaxis, self.taxiList, self.env, self.qvalueDispatch, self.nsaDispatch, self)
+
 
         self.iteration = 0
         self.plotMap = False
@@ -62,32 +68,42 @@ class Experiment(object):
         self.initialization()
         self.iteration += 1
         cnt = 0
+
         preTime = time.time()
-        lastCallTime = 0
+        checkInterval = 120  # second
+        lastCallTime = checkInterval
+
 
         while not self.env.isGoalReached():
             cnt += 1
             if cnt % 1000 == 0:
                 print ".",
-                if cnt % 80000 == 0: print ""
+                if cnt % 80000 == 0:
+                    print ""
 
             # interval = (time.time() - preTime) * 20
             # print interval
             # preTime = time.time()
-            interval = 0.1
+            interval = 0.1  # second
 
             # if not self.calledTaxiQL:
             lastCallTime += interval
-            if lastCallTime > 180 or not self.calledTaxiQL:
-                taxi = self.findFastestTaxi()
+
+            if lastCallTime >= checkInterval or not self.calledTaxiQL:    # check every 2 minutes
+                # let dispatchQL choose which taxi to be called this time
+                taxi = self.dispatchQL.go(lastCallTime)
                 if taxi is not None and taxi in self.taxiList:
-                    if self.isQuicker(taxi, 120):  # 2 minutes quicker
+                    # if self.isQuicker(taxi, checkInterval):             # 2 minutes quicker
                         self.callTaxi(taxi)
                 lastCallTime = 0
 
+            self.dispatchQL.addTime(interval)
+            # if taxi:                                                    # found a faster taxi
+            #     self.dispatchQL.go(taxi, trafficTime + 120, interval)
+            # else:
             # perform Q learning for called taxis
             for ql in self.calledTaxiQL:
-                ql.go(interval)
+                ql.go(interval)                                     # this will learn taxi routing policy
 
             for taxi in self.taxiList:
                 taxi.move(interval)
@@ -102,7 +118,6 @@ class Experiment(object):
 
             # update control signals at every intersection
             self.env.updateContralSignal(interval)
-
 
             # if cnt % 1000 == 0:
             #     for road in self.env.realMap.getRoads().values():
@@ -207,34 +222,6 @@ class Experiment(object):
         for key in self.nsa.keys():
             f.write(str(key) + ": " + str(self.nsa[key]) +"\n")
 
-    # def findFastestTaxi(self):
-    #     """
-    #     Find the fastest taxi to the goal location
-    #     :return: the fastest taxi to the goal location
-    #     """
-    #     fastestTaxi = None
-    #     shortestTime = sys.maxint
-    #
-    #     for ql in self.calledTaxiQL:
-    #         time = self.env.timeToGoalState(ql.getTaxi().getPosition())
-    #         if time < shortestTime:
-    #             shortestTime = time
-    #
-    #     # Find the taxi with shorter time than the called taxis to the goal location.
-    #     # By certain minutes shorter do we consider it is quicker than the called taxis to the goal location.
-    #     # for taxi in self.env.getTaxis().values():
-    #     #     if taxi.isAvailable():
-    #     #         taxi.setAvailable(False)  # lock this taxi first
-    #     #         time = self.env.timeToGoalState(taxi.getPosition())
-    #     #         if time < shortestTime:
-    #     #             if fastestTaxi is not None:
-    #     #                 fastestTaxi.setAvailable(True)  # unlock the previous fastest taxi
-    #     #             fastestTaxi = taxi
-    #     #             shortestTime = time
-    #     #         else:
-    #     #             taxi.setAvailable(True)  # unlock this taxi
-    #     return fastestTaxi
-
     def findFastestTaxi(self):
         """
         From the goal's location, start performing search algorithm, expanding the route until reach one taxi
@@ -246,7 +233,7 @@ class Experiment(object):
         sourceInter = goal.current.lane.road.getSource()
         taxi1, time1 = dijkstraSearch(self.env.realMap, sourceInter, self.allTaxis)
         taxi2, time2 = dijkstraSearch(self.env.realMap, targetInter, self.allTaxis)
-        return taxi1 if time1 < time2 else taxi2
+        return (taxi1, time1) if time1 < time2 else (taxi2, time2)
 
     def callTaxi(self, taxi):
         """
@@ -298,11 +285,6 @@ class Experiment(object):
         :param taxiNum: the total number of taxis to be generated
         :return: the list of generated taxis
         """
-        # taxis = []
-        # for i in range(taxiNum):
-        #     x, y = self.env.randomLocation()
-        #     taxis.append(Taxi(i, x, y))
-        # return taxis
         self.env.addRandomCars(self.carNum)
         self.env.addRandomTaxis(self.taxiNum)
 
