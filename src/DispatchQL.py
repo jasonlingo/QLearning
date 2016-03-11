@@ -7,7 +7,7 @@ class DispatchQL(QLearning):
     A Q-learning algorithm for learning dispatching policy
     """
 
-    def __init__(self, exp, environment, epsilon=0.1, alpha=0.1, gamma=0.9):
+    def __init__(self, exp, environment):
         """
         Args:
             taxis      : all taxis on the environment
@@ -19,12 +19,11 @@ class DispatchQL(QLearning):
             gamma      : discounting factor
         Returns:
         """
-        self.experiment = exp
-        self.availableTaxis = availableTaxis
+        self.exp = exp
         self.env = environment
-        self.epsilon =
-        self.alpha = alpha
-        self.gamma = gamma
+        self.epsilon = self.exp.epsilon
+        self.alpha = self.exp.alpha
+        self.gamma = self.exp.gamma
 
         # Q value lookup dictionary
         # {((x, y), action): Q value}
@@ -33,13 +32,14 @@ class DispatchQL(QLearning):
         # record the visited times for state-action
         self.nsa = {}
 
-        # for checking oscillation
-        self.steps = []
-
         # record data for one trial
         self.stateAction = {}
         self.trialTime = 0
-        self.taxiTrafficTime = {}
+        self.stateCalledTaxi = {}
+        self.lastStateAction = None
+        self.currStateAction = None
+        self.updateQvalueFlag = False
+        self.goal = self.exp.getGoalLocation().current.lane.road.id
 
     def go(self, interval):
         """
@@ -48,51 +48,61 @@ class DispatchQL(QLearning):
         state: the taxis' position (by road id)
         :param interval: second
         """
-        self.addTime(interval)
+        """
+        when a new taxi is called, give a negative reward to the previous policy
 
-        oldState = self.getState()     # list all the available taxis' positions
-        action = self.chooseAction()   #
+        learning process:
+            get the current state (position of taxis)
+            choose the quickest taxi
+            let taxi go
 
-        taxi, trafficTime = self.experiment.findFastestTaxi()
-        if not self.experiment.isQuicker(taxi, CHECK_INTERVAL):
-            taxi = None
+            keep the lastest called taxi and state
+        """
+        self.trialTime += interval
+        curState = self.getState()
 
-        # self.stateAction[(tuple(oldState), action)] = self.trialTime  # the time for the chosen taxi to arrive the goal location after this action is called
-        if taxi not in self.taxiTrafficTime:
-            self.taxiTrafficTime[taxi] = trafficTime
+        if self.trialTime >= CHECK_INTERVAL:
+            taxi = self.chooseAction(curState)
+            self.currStateAction = (curState, taxi)
+            if taxi in self.exp.taxiList:
+                self.exp.callTaxi(taxi)
+            self.trialTime = 0
+            self.updateQvalueFlag = True
 
-        # goal already reached
-        if self.env.isGoalReached():
-            reward = self.getReward()
-            self.learn(oldState, None, reward, oldState)
-            self.resetTrial()
-            return
+        # let taxis and cars move
+        for ql in self.exp.calledTaxiQL:
+            ql.go(interval)
+        for otherTaxi in self.exp.taxiList:
+            otherTaxi.move(interval)
 
         nextState = self.getState()
-
-        if oldState != nextState:
-            reward = self.env.getReward(nextState, action)
-
-            self.steps.append(nextState)
-            if self.steps.count(nextState) > 1000:
-                print "Oscillation at: ", nextState, " => ", self.steps.count(nextState)
-
-            # self.taxi.setPosition(nextPos)
-            self.learn(oldState, action, reward, nextState)
+        if self.updateQvalueFlag:
+            self.updateQvalueFlag = False
+            reward = self.getReward(nextState, taxi)
+            action = taxi.trajectory.current.lane.road.id
+            self.learn(curState, action, reward, nextState)
+            self.lastStateAction = self.currStateAction
 
     def getState(self):
-        return sorted([taxi.trajectory.current.lane.road.id for taxi in self.exp.allTaxis if taxi.isAvailable() or taxi.isCalled()])
+        """
+        The state should include the available taxis' location and the goal's location.
+        TODO: considering a long road, we should include the relative position of a taxi on a road.
+        """
+        return (self.goal, tuple(sorted([taxi.trajectory.current.lane.road.id for taxi in self.exp.allTaxis if taxi.isAvailable() or taxi.isCalled()])))
 
     def getActions(self):
-        pass
+        taxiMapping = {}
+        for taxi in self.exp.allTaxis:
+            taxiMapping[taxi.trajectory.current.lane.road.id] = taxi
+        return taxiMapping
 
-    def getReward(self):
-        # if self.env.isGoalReached():
-        pass
-        return  # TODO
-
-    def addTime(self, second):
-        self.trialTime += second
+    def getReward(self, state, action):
+        if self.env.isGoalReached():
+            return 1000
+        if action is None:
+            return  1
+        else:
+            return -1
 
     def resetTrial(self):
         self.trialTime = 0
@@ -105,21 +115,12 @@ class DispatchQL(QLearning):
             action1 (Road): action taken in state1
             reward: (float) reward received after taking action at state1
             state2: (road)
-        Returns:
         """
-        actions = self.getActions()
+        actions = self.getActions().keys()
         maxqnew = max([self.qvalue.get((state2, a), 0.0) for a in actions])
         self.updateQValue(state1, action1, reward, maxqnew)
 
     def updateQValue(self, state, action, reward, maxqnew):
-        """
-        Args:
-            state:
-            action:
-            reward:
-            maxqnew:
-        Returns:
-        """
         self.nsa[(state, action)] = self.nsa.get((state, action), 0) + 1
         oldv = self.qvalue.get((state, action), 0.0)
         self.qvalue[(state, action)] = oldv + self.alpha * (reward + self.gamma * maxqnew - oldv)
@@ -127,48 +128,29 @@ class DispatchQL(QLearning):
 
     def chooseAction(self, state):
         """
-        Randomly choose an action if the random variable is less than the
-        epsilon. Or choose the action that has the highest q value of the
-        given state.
+        1. Randomly choose an action if the random variable is less than the
+           epsilon.
+        2. Choose the action that has the highest q value of the given state.
+        3. Choose the quickest taxi.
         Args:
             pos: LanePosition
         Returns:
             a chosen action
         """
         if random.random() < self.epsilon:
-            # print "@",
-            action = random.choice(self.taxis)  # exploration
+            taxi = random.choice(self.exp.allTaxis)  # exploration
         else:
-            beenPos = False
-            # for a in actions: # FIXME
-            #     if self.getQValue(state, a) > 0:
-            #         beenPos = True
-            #         break
-            if True or beenPos: # FIXME
-                # print "*",
-                # q = [self.getQValue(state, a) for a in actions]
-                q = [self.qvalue.get((state, a), 0.0) for a in actions]
-                maxQIdx = q.index(max(q))
+            taxiMapping = self.getActions()
+            actions = taxiMapping.keys()
+            q = [self.qvalue.get((state, a), 0.0) for a in actions]
+            maxQIdx = q.index(max(q))
+            if maxQIdx > 0:
                 action = actions[maxQIdx]
-            # else:
-            #     print "?",
-            #     # provide information for choosing an action
-            #     fastestTime = sys.maxint
-            #     action = None
-            #     for a in actions:
-            #         if a == Settings.NORTH:
-            #             time = self.env.map.trafficTime((pos[0], pos[1]+1), self.env.getGoalLocation(), a)
-            #         elif a == Settings.SOUTH:
-            #             time = self.env.map.trafficTime((pos[0], pos[1]-1), self.env.getGoalLocation(), a)
-            #         elif a == Settings.EAST:
-            #              time = self.env.map.trafficTime((pos[0]+1, pos[1]), self.env.getGoalLocation(), a)
-            #         elif a == Settings.WEST:
-            #              time = self.env.map.trafficTime((pos[0]-1, pos[1]), self.env.getGoalLocation(), a)
-            #
-            #         if time < fastestTime:
-            #             fastestTime = time
-            #             action = a
-        return action
+                taxi = taxiMapping[action]
+            else:
+                taxi, trafficTime = self.exp.findFastestTaxi()
 
-    def getTaxi(self):
-        return self.taxi
+            # if not self.exp.isQuicker(taxi, CHECK_INTERVAL):
+            #     taxi = None
+        return taxi
+

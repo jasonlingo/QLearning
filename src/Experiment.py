@@ -51,10 +51,11 @@ class Experiment(object):
         # a Q-Learning model for dispatching policy
         self.dispatchQL = DispatchQL(self, self.env)
 
-
         self.iteration = 0
         self.plotMap = False
         self.goalLocation = self.env.getGoalLocation()
+
+        self.progressCnt = 0
 
     def startLearning(self):
         """
@@ -65,95 +66,24 @@ class Experiment(object):
         """
         self.initialization()
         self.iteration += 1
-        cnt = 0
-
-        preTime = time.time()
-        checkInterval = 120  # second
-        lastCallTime = checkInterval
-
 
         while not self.env.isGoalReached():
-            cnt += 1
-            if cnt % 1000 == 0:
-                print ".",
-                if cnt % 80000 == 0:
-                    print ""
+            self.showProgress()
 
-            # interval = (time.time() - preTime) * 20
-            # print interval
-            # preTime = time.time()
             interval = 0.1  # second
+            self.dispatchQL.go(interval)
 
-            # if not self.calledTaxiQL:
-            lastCallTime += interval
+            if not self.env.isGoalReached():
+                for car in self.env.getCars().values():
+                    car.move(interval)
 
-            if lastCallTime >= checkInterval or not self.calledTaxiQL:    # check every 2 minutes
-                # let dispatchQL choose which taxi to be called this time
-                taxi = self.dispatchQL.go(lastCallTime)
-                if taxi is not None and taxi in self.taxiList:
-                    # if self.isQuicker(taxi, checkInterval):             # 2 minutes quicker
-                        self.callTaxi(taxi)
-                lastCallTime = 0
+                # update control signals at every intersection
+                self.env.updateContralSignal(interval)
 
-            self.dispatchQL.addTime(interval)
-            # if taxi:                                                    # found a faster taxi
-            #     self.dispatchQL.go(taxi, trafficTime + 120, interval)
-            # else:
-            # perform Q learning for called taxis
-            for ql in self.calledTaxiQL:
-                ql.go(interval)                                     # this will learn taxi routing policy
+        print "\n arrived !!! at step: ", self.progressCnt
 
-            for taxi in self.taxiList:
-                taxi.move(interval)
-                # taxi.setRandomAvailable()
-
-            for car in self.env.getCars().values():
-                car.move(interval)  # convert millisecond to second
-                # period = (time.time() - start_time)
-                # print "car move uses", (time.time() - start_time), "seconds"
-                # while (time.time() - start_time) * 1000 < ANIMATION_LAPSE:
-                #     print ".",
-
-            # update control signals at every intersection
-            self.env.updateContralSignal(interval)
-
-            # if cnt % 1000 == 0:
-            #     for road in self.env.realMap.getRoads().values():
-            #         road.updateAvgSpeed()
-
-            # ======================================================
-            # plot experiment data on map
-            # ======================================================
-            # self.env.map.showMap()
-            # plt.plot([self.env.getGoalLocation()[0]], \
-            #          [self.env.getGoalLocation()[1]], "ro")
-            # for taxi in self.taxiList:
-            #     plt.plot([taxi.getPosition()[0]], \
-            #              [taxi.getPosition()[1]], 'bo')
-
-            # for ql in self.calledTaxi:
-            #     plt.plot([ql.getTaxi().getPosition()[0]], \
-            #              [ql.getTaxi().getPosition()[1]], 'yo')
-            # plt.savefig('pic/map_'+str(self.iteration)+"_"+str(cnt)+'.png')
-
-            # print ""
-            # for key in self.qvalue.keys():
-            #     print key, ":", self.qvalue[key], " : ", self.nsa[key]
-            #
-            # if cnt % 50 == 0:
-            #     raw_input("next?")
-
-        print "\n arrived !!! at step: ", cnt
-
-        # if (self.iteration <= 100 and self.iteration % 10 == 0) or \
-        #     (self.iteration <= 1000 and self.iteration % 100 == 0) or \
-        #     (self.iteration % 500 == 0):
-        #     plt.clf()
-        #     self.plotMap = False
-        #     self.outputQvalue()
-        #     self.outputNSA()
-        #     self.plotResult(self.iteration)
         self.setResetFlag(True)  # Tell animated map to wait for the initialization procedure
+        self.dispatchQL.resetTrial()
 
     def initialization(self):
         """
@@ -177,27 +107,6 @@ class Experiment(object):
         ends.
         """
         self.env.setResetFlag(b)
-
-    # def plotResult(self, cnt):
-    #     if not self.plotMap:
-    #         self.env.map.showMap()
-    #         self.plotMap = True
-    #
-    #     # plot the route of called taxis
-    #     for ql in self.calledTaxiQL:
-    #         for i in range(len(ql.getTaxi().toGoalRouteX)):
-    #             r = float(i) / len(ql.getTaxi().toGoalRouteX)
-    #             plt.plot([ql.getTaxi().toGoalRouteX[i]], [ql.getTaxi().toGoalRouteY[i]], "o", color=(r, 0, 1))
-    #         for i in range(len(ql.getTaxi().randomRouteX)):
-    #             plt.plot([ql.getTaxi().randomRouteX[i]], [ql.getTaxi().randomRouteY[i]], "o", color='y')
-    #
-    #     # plot the route for other taxis that are not been called
-    #     # for taxi in self.taxiList:
-    #     #     plt.plot(taxi.randomRouteX, taxi.randomRouteY, "o", color='lightgrey')
-    #
-    #     plt.plot([self.env.getGoalLocation()[0]], [self.env.getGoalLocation()[1]], 'ro')
-    #     plt.title("No."+str(self.iteration)+" trial")
-    #     plt.savefig('result/pic/Trial_'+str(cnt)+'.png')
 
     def outputQvalue(self):
         if not self.plotMap:
@@ -247,7 +156,6 @@ class Experiment(object):
         self.taxiList.remove(taxi)
         print ""
         print "Called", taxi.id
-        # print "call taxi no." + str(taxi.getId())
 
     def isQuicker(self, taxi, second):
         """
@@ -286,6 +194,9 @@ class Experiment(object):
         self.env.addRandomCars(self.carNum)
         self.env.addRandomTaxis(self.taxiNum)
 
+    def getGoalLocation(self):
+        return self.env.getGoalLocation()
+
     def printQValue(self):
         print "Final Q values======================================"
         for key in self.qvalue:
@@ -299,3 +210,11 @@ class Experiment(object):
         print "Final Nsa==========================================="
         for key in self.nsa:
             print str(key) + ": " + str(self.nsa[key])
+
+    def showProgress(self):
+        self.progressCnt += 1
+        if self.progressCnt % 1000 == 0:
+            print ".",
+            if self.progressCnt >= 50000:
+                print ""
+                self.progressCnt = 0

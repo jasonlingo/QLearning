@@ -33,7 +33,7 @@ class QLearning(object):
         self.nsa = nsa
 
         # for checking oscillation
-        self.steps = []
+        self.steps = {}
 
     def go(self, second):
         """
@@ -53,21 +53,13 @@ class QLearning(object):
         self.taxi.move(second)
         nextPos = self.taxi.getPosition().lane.road  # current road
 
-        # nextPos = self.env.nextPos(self.taxi, action)
-        # TODO
-        # minus = 0
-        # if (self.env.map.findRoad(oldPos), action) in self.nsa:
-        #     minus = self.nsa[(self.env.map.findRoad(oldPos), action)] * 0.1
-        # reward = self.env.getReward(nextPos, action) - minus
         if oldPos != nextPos:
             reward = self.env.getReward(nextPos, action)
-
-            self.steps.append(nextPos)
-            if self.steps.count(nextPos) > 1000:
-                print "Oscillation at: ", nextPos, " => ", self.steps.count(nextPos)
-
-            # self.taxi.setPosition(nextPos)
             self.learn(oldPos, action, reward, nextPos)
+
+            self.steps[nextPos] = self.steps.get(nextPos, 0) + 1
+            if self.steps[nextPos] > 1000:
+                print "Oscillation at: ", nextPos, " => ", self.steps[nextPos]
 
         if self.env.checkArriveGoal(nextPos):
             self.env.setReachGoal(True)
@@ -86,14 +78,6 @@ class QLearning(object):
         self.updateQValue(state1, action1, reward, maxqnew)
 
     def updateQValue(self, state, action, reward, maxqnew):
-        """
-        Args:
-            state:
-            action:
-            reward:
-            maxqnew:
-        Returns:
-        """
         self.nsa[(state, action)] = self.nsa.get((state, action), 0) + 1
         oldv = self.qvalue.get((state, action), 0.0)
         self.qvalue[(state, action)] = oldv + self.alpha * (reward + self.gamma * maxqnew - oldv)
@@ -112,40 +96,12 @@ class QLearning(object):
         actions = self.env.getAction(state)  # roads
 
         if random.random() < self.epsilon:
-            # print "@",
             action = random.choice(actions)  # exploration
         else:
-            beenPos = False
-            # for a in actions: # FIXME
-            #     if self.getQValue(state, a) > 0:
-            #         beenPos = True
-            #         break
-            if True or beenPos: # FIXME
-                # print "*",
-                # q = [self.getQValue(state, a) for a in actions]
-                q = [self.qvalue.get((state, a), 0.0) for a in actions]
-                maxQIdx = q.index(max(q))
-                action = actions[maxQIdx]
-            # else:
-            #     print "?",
-            #     # provide information for choosing an action
-            #     fastestTime = sys.maxint
-            #     action = None
-            #     for a in actions:
-            #         if a == Settings.NORTH:
-            #             time = self.env.map.trafficTime((pos[0], pos[1]+1), self.env.getGoalLocation(), a)
-            #         elif a == Settings.SOUTH:
-            #             time = self.env.map.trafficTime((pos[0], pos[1]-1), self.env.getGoalLocation(), a)
-            #         elif a == Settings.EAST:
-            #              time = self.env.map.trafficTime((pos[0]+1, pos[1]), self.env.getGoalLocation(), a)
-            #         elif a == Settings.WEST:
-            #              time = self.env.map.trafficTime((pos[0]-1, pos[1]), self.env.getGoalLocation(), a)
-            #
-            #         if time < fastestTime:
-            #             fastestTime = time
-            #             action = a
+            q = [self.qvalue.get((state, a), 0.0) for a in actions]
+            maxQIdx = q.index(max(q))
+            action = actions[maxQIdx]
         return action
-
 
     def getTaxi(self):
         return self.taxi
