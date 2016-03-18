@@ -80,7 +80,7 @@ class Experiment(object):
                 # update control signals at every intersection
                 self.env.updateContralSignal(interval)
 
-        print "\n arrived !!! at step: ", self.progressCnt
+        print "\narrived !!! at step: ", self.progressCnt
 
         self.setResetFlag(True)  # Tell animated map to wait for the initialization procedure
         self.dispatchQL.resetTrial()
@@ -99,6 +99,7 @@ class Experiment(object):
         self.calledTaxiQL = []
         self.env.setReachGoal(False)
         self.setResetFlag(False)  # Tell the animated map to start plotting cars and taxis
+        self.progressCnt = 0
 
     def setResetFlag(self, b):
         """
@@ -215,6 +216,5 @@ class Experiment(object):
         self.progressCnt += 1
         if self.progressCnt % 1000 == 0:
             print ".",
-            if self.progressCnt >= 50000:
+            if self.progressCnt % 50000 == 0:
                 print ""
-                self.progressCnt = 0
