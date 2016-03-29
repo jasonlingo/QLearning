@@ -13,8 +13,8 @@ if __name__ == '__main__':
         """
         Perform the learning process for EXP_NUM trials.
         """
-        # while not realMap.isAniMapPlotOk():
-        #     time.sleep(2)
+        while not realMap.isAniMapPlotOk():
+            time.sleep(1)
         for i in range(EXP_NUM):
             print "========== " + str(i+1) + "-th trial =========="
             print "Goal locates at", exp.goalLocation.current.lane.road.id
@@ -36,11 +36,12 @@ if __name__ == '__main__':
         time.sleep(signalInterval)
 
     # Create a RealMap object and pass it to a Environment object.
-    # Start a new thread that runs the learning process.
     realMap = RealMap(SHAPEFILE)
     env = Environment(realMap)
     exp = Experiment(env, TAXI_NUM, CAR_NUM, epsilon=EPSILON, alpha=ALPHA, gamma=GAMMA)
-    runExp()
+
+    # For debug use
+    # runExp()
 
     # Simulation thread
     simulation = threading.Thread(target=runExp)
@@ -55,4 +56,4 @@ if __name__ == '__main__':
     aniMap = AnimatedMap(realMap)
     aniMap.plotAnimatedMap(fig, ax)
 
-    print "Experiments end"
+    print "##### Experiments end #####"

@@ -1,12 +1,15 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from Shapefile import Shapefile
 from Road import Road
+from collections import defaultdict
 from Car import *
 import pygmaps
 import webbrowser
 import time
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from Dijkstra import *
 
 
@@ -62,7 +65,7 @@ class RealMap(object):
 
                 if rd.isConnected(inter):
                     if not rd.getSource():
-                        rd.setSource(inter)  # FIXME: reduce some distance for intersection?
+                        rd.setSource(inter)  # TODO: reduce some distance for intersection?
                     elif not rd.getTarget():
                         rd.setTarget(inter)
                         inter.addInRoad(rd)
@@ -169,15 +172,16 @@ class RealMap(object):
         position = random.random() * lane.length
         return lane, position
 
-    def setRandomGoalPosition(self):
+    def setRandomGoalPosition(self):  # TODO: consider move to Experiment or Environment
         """
         Assign the goal location.
         :param loc:
         :return:
         """
         lane, position = self.randomLaneLocation()
-        lane.road.setAvgSpeed(20)  # reduce the speed of the road on which a car accident is located
-        self.goalLocation = Trajectory(None, lane, position)
+        # lane.road.setAvgSpeed(20)  # FIXME: reduce the speed of the road on which a car accident is located
+        goalCar = Car(lane, position)
+        self.goalLocation = Trajectory(goalCar, lane, position)
         self.goalLocation.setGoal()
         return self.goalLocation
 
@@ -370,34 +374,6 @@ class RealMap(object):
         # Open the map file on a web browser.
         url = "file://" + os.getcwd() + "/" + mapFilename
         webbrowser.open_new(url)
-
-# class Location(object):
-#     """
-#     A class that represents a location. It contains the information of the road or intersection id.
-#     """
-#
-#     def __init__(self, coordinates, roadId=None, intersId=None):
-#         """
-#         :param coordinates: the coordinate of this location
-#         :param roadId: if the location is on a road, this records the road id
-#                        that this location belongs to
-#         :param IntersId: if the intersection is on a intersection, this records the
-#                          intersection id this location belongs to
-#         """
-#         self.coordinates = coordinates
-#         self.roadId = roadId
-#         self.intersId = intersId
-#
-#     def equals(self, loc):
-#         """
-#         Check whether the given location is the same with this location.
-#         :param loc: the given location
-#         :return: True if the given location is equal to this location; False otherwise
-#         """
-#         return self.roadId == loc.roadId and self.intersId == loc.intersId and\
-#                self.coordinates == loc.coordinates
-
-
 
 
 # =========================================================

@@ -100,7 +100,7 @@ class Car(object):
 
         # print "distanceToNextCar", distanceToNextCar,
 
-        safeIntersectionDist = 0.001 + timeGap + pow(self.speed, 2) / (2 * maxDeceleration)  # check unit
+        safeIntersectionDist = 0.001 + timeGap + pow(self.speed, 2) / (2 * maxDeceleration)
         if self.trajectory.distanceToStopLine() > 0:
             safeInterDistRatio = (safeIntersectionDist / float(self.trajectory.distanceToStopLine() if self.trajectory.distanceToStopLine() > 0 else 0.0001))
             intersectionCoeff = pow(safeInterDistRatio, 2)
