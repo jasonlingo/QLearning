@@ -6,14 +6,14 @@
 EXP_NUM = 30000
 
 # The total number of taxis in the system
-TAXI_NUM = 30
+TAXI_NUM = 20
 
 # The total number of cars in the system
-CAR_NUM = 20
+CAR_NUM = 50
 
 # The threshold of time (minute) for the system to call a new taxi that
 # might arrive the goal location with shorter time.
-CALL_NEW_TAXI_TIME_GAP = 5
+CALL_NEW_TAXI_TIME_GAP = 2
 
 # The filename of the shapefile for the traffic simulator
 SHAPEFILE = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"

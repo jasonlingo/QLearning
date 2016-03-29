@@ -34,7 +34,7 @@ class DispatchQL(QLearning):
 
         # record data for one trial
         self.stateAction = {}
-        self.trialTime = 0
+        self.trialTime = CHECK_INTERVAL
         self.stateCalledTaxi = {}
         self.lastStateAction = None
         self.currStateAction = None
@@ -61,13 +61,15 @@ class DispatchQL(QLearning):
         self.trialTime += interval
         curState = self.getState()
 
+        taxi = None
         if self.trialTime >= CHECK_INTERVAL:
             taxi = self.chooseAction(curState)
             self.currStateAction = (curState, taxi)
             if taxi in self.exp.taxiList:
                 self.exp.callTaxi(taxi)
-            self.trialTime = 0
             self.updateQvalueFlag = True
+            self.trialTime = 0
+
 
         # let taxis and cars move
         for ql in self.exp.calledTaxiQL:
@@ -76,7 +78,7 @@ class DispatchQL(QLearning):
             otherTaxi.move(interval)
 
         nextState = self.getState()
-        if self.updateQvalueFlag:
+        if self.updateQvalueFlag and taxi:
             self.updateQvalueFlag = False
             reward = self.getReward(nextState, taxi)
             action = taxi.trajectory.current.lane.road.id
@@ -137,7 +139,9 @@ class DispatchQL(QLearning):
         Returns:
             a chosen action
         """
-        if random.random() < self.epsilon:
+        if not self.exp.allTaxis:
+            return
+        if random.random() < self.epsilon:  # TODO: make epsilon decrease gradually
             taxi = random.choice(self.exp.allTaxis)  # exploration
         else:
             taxiMapping = self.getActions()
