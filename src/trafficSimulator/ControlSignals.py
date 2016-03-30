@@ -140,7 +140,7 @@ class ControlSignals(object):
         for road in self.intersection.getInRoads():
             print road.id, "from", road.source.center.getCoords(), "to", road.target.center.getCoords()
         print "out roads"
-        for road in self.intersection.getRoads():
+        for road in self.intersection.getOutRoads():
             print road.id, "from", road.source.center.getCoords(), "to", road.target.center.getCoords()
 
         return -1

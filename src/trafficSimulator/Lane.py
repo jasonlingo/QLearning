@@ -39,10 +39,12 @@ class Lane(object):
         return self.road.id
 
     def isRightmost(self):
-        return self == self.rightmostAdjacent
+        # return self == self.rightmostAdjacent
+        return self == self.road.getLanes()[-1]
 
     def isLeftmost(self):
-        return self == self.leftmostAdjacent
+        # return self == self.leftmostAdjacent
+        return self == self.road.getLanes()[0]
 
     # def getLeftBorder(self):
     #     return Segment(self.sourceSegment.source, self.targetSegment.target)
@@ -56,10 +58,10 @@ class Lane(object):
     #     self.direction = self.middleLine.direction
 
     def getTurnDirection(self, other):
-        return self.road.getTurnDirection(other.road)  # it now only returns 0
+        return self.road.getTurnDirection(other)
 
-    def getDirection(self):
-        return self.direction
+    # def getDirection(self):
+    #     return self.direction
 
     def getPoint(self, a):
         """

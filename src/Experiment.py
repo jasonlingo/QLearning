@@ -9,6 +9,7 @@ from Queue import PriorityQueue
 from Dijkstra import dijkstraSearch, dijkstraTrafficTime
 from DispatchQL import DispatchQL
 import random
+from Settings import MIN_EPSILON
 
 
 class Experiment(object):
@@ -30,6 +31,8 @@ class Experiment(object):
         self.taxiNum = taxiNum
         self.carNum = carNum
         self.epsilon = epsilon
+        self.defaultEps = epsilon
+        self.epsilonDict = {}
         self.alpha = alpha
         self.gamma = gamma
 
@@ -116,9 +119,9 @@ class Experiment(object):
             f = open('result/qvalue.txt', 'a')
 
         f.write("\n\n")
-        f.write("===== No."+str(self.iteration)+" =====\n")
+        f.write("===== No." + str(self.iteration)+" =====\n")
         for key in self.qvalue.keys():
-            f.write(str(key) + ": " + str(self.qvalue[key]) +"\n")
+            f.write(str(key) + ": " + str(self.qvalue[key]) + "\n")
 
     def outputNSA(self):
         if not self.plotMap:
@@ -126,9 +129,9 @@ class Experiment(object):
         else:
             f = open('result/nsa.txt', 'a')
         f.write("\n\n")
-        f.write("===== No."+str(self.iteration)+" =====\n")
+        f.write("===== No." + str(self.iteration)+" =====\n")
         for key in self.nsa.keys():
-            f.write(str(key) + ": " + str(self.nsa[key]) +"\n")
+            f.write(str(key) + ": " + str(self.nsa[key]) + "\n")
 
     def findFastestTaxi(self):
         """
@@ -152,7 +155,7 @@ class Experiment(object):
         goalRoad = goalLane.road
         goalPosition = self.goalLocation.current.position
         taxi.beenCalled(goalRoad, goalLane, goalPosition)
-        ql = QLearning(taxi, self.env, self.qvalue, self.nsa, self.getEpsilon())
+        ql = QLearning(taxi, self, self.env, self.qvalue, self.nsa, self.defaultEps)
         self.calledTaxiQL.append(ql)
         self.taxiList.remove(taxi)
         print ""
@@ -165,7 +168,8 @@ class Experiment(object):
         :param second: int
         :return: Boolean
         """
-        if not self.calledTaxiQL: return True
+        if not self.calledTaxiQL:
+            return True
 
         times = []
         goalRoad = self.goalLocation.current.lane.road
@@ -176,15 +180,19 @@ class Experiment(object):
         taxiInter = taxi.trajectory.current.lane.road.getTarget()
         timeForGivenTaxi = dijkstraTrafficTime(self.env.realMap, taxiInter, goals)
         for time in times:
-            if time < timeForGivenTaxi: return False
+            if time < timeForGivenTaxi:
+                return False
         return True
 
-    def getEpsilon(self):
+    def getEpsilon(self, initEps, iteration):  #TODO: create a shared function
         """
         Reduce epsilon gradually when running the learning process for many iterations
         :return: the adjusted epsilon
         """
-        return max(0.05, self.epsilon * math.pow(0.9999, self.iteration))
+        key = (initEps, iteration)
+        if key not in self.epsilonDict:
+            self.epsilonDict[key] = max(MIN_EPSILON, self.epsilon * math.pow(0.9999, iteration))
+        return self.epsilonDict[key]
 
     def addCarTaxi(self):
         """

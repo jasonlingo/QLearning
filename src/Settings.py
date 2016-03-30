@@ -31,6 +31,9 @@ TIME_STEP = 100
 # The exploration factor
 EPSILON = 0.15
 
+# minimal epsilon
+MIN_EPSILON = 0.01
+
 # The learning rate
 ALPHA = 0.2
 

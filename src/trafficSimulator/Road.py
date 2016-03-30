@@ -1,7 +1,9 @@
+from __future__ import division
 from Traffic import *
 from Traffic import RoadType
 from Lane import Lane
-
+from TrafficSettings import MAX_ROAD_LANE_NUM
+import numpy as np
 
 class Road(object):
     """
@@ -100,8 +102,8 @@ class Road(object):
                 return True
         return False
 
-    def addIntersection(self, intersection):
-        self.connectedIntersections.append(intersection)
+    # def addIntersection(self, intersection):
+    #     self.connectedIntersections.append(intersection)
 
     def leftMostLane(self):
         if self.lanes:
@@ -135,18 +137,35 @@ class Road(object):
             self.setLength()
         return self.length
 
+    def getLanes(self):
+        return self.lanes
+
     def getTurnDirection(self, other):
         """
-        Each road has only one lane for now. So it returns 0.
+        Find the road of the next turn and return the corresponding road order
         :param other: the next road
         :return: the turn number
         """
         if self.target != other.source:
             print "invalid roads"
             return
-        # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4 #FIXME: this is the original version
+        # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4
+        # return random.choice([x for x in range(len(other.lanes))])
 
-        return random.choice([x for x in range(len(other.lanes))])
+        # need to determine the turn to the next road (other)
+        roadOrder = []
+        sourceVec = np.array(self.getSource().center.getCoords()) - np.array(self.getTarget().center.getCoords())
+        for road in self.target.getOutRoads():
+            targetVec = np.array(road.getTarget().center.getCoords()) - np.array(road.getSource().center.getCoords())
+            angle = calcVectAngle(sourceVec, targetVec)
+            if angle == 0:
+                angle = 360
+            roadOrder.append((angle, road))
+
+        roadOrder.sort()
+        for i, roadTup in enumerate(roadOrder):
+            if roadTup[1] == other:
+                return i
 
     def update(self):
         if not self.source or not self.target:
@@ -177,5 +196,8 @@ class Road(object):
         #     self.lanes[i].rightmostAdjacent = self.lanes[0]
             # results.append(self.lanes[i].update())
         # return results
-        if not self.lanes:
+
+        # if not self.lanes:
+        #     self.lanes.append(Lane(self))
+        while len(self.lanes) < MAX_ROAD_LANE_NUM:
             self.lanes.append(Lane(self))

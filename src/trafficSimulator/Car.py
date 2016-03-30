@@ -43,7 +43,7 @@ class Car(object):
 
     def getSpeed(self):
         """
-        :return: the speed (km/h)
+        :return: speed (km/h)
         """
         return self.speed
 
@@ -62,12 +62,12 @@ class Car(object):
         """
         self.speed = min(self.maxSpeed, max(round(speed, 10), 0))
 
-    def getDirection(self):
-        """
-        Get the current direction of this car.
-        :return:
-        """
-        return self.trajectory.direction
+    # def getDirection(self):
+    #     """
+    #     Get the current direction of this car.
+    #     :return:
+    #     """
+    #     return self.trajectory.direction
 
     def release(self):
         self.trajectory.release()
@@ -134,12 +134,12 @@ class Car(object):
         # self.speed += acceleration * second * 3600  # convert km/s to km/h
         self.setSpeed(self.speed + acceleration * second * 3600)
 
-        # if (not self.trajectory.isChangingLanes) and self.nextLane:
-        #     currentLane = self.trajectory.current.lane
-        #     turnNumber = currentLane.getTurnDirection(self.nextLane)  # FIXME: it now only returns 0
-        #     preferedLane = self.getPreferedLane(turnNumber, currentLane)
-        #     if preferedLane != currentLane:  #FIXME: it only returns the currentLane
-        #         self.trajectory.changeLane(preferedLane)
+        if (not self.trajectory.isChangingLanes) and self.nextLane:
+            currentLane = self.trajectory.current.lane
+            turnNumber = currentLane.getTurnDirection(self.nextLane.road)
+            preferedLane = self.getPreferedLane(turnNumber, currentLane)
+            if preferedLane != currentLane:
+                self.trajectory.changeLane(preferedLane)
 
         step = max(self.speed * second / 3600.0 + 0.5 * acceleration * math.pow(second, 2), 0)
         # print "car's speed", self.speed
@@ -152,21 +152,26 @@ class Car(object):
         step = min(nextCarDist, step)
         if self.trajectory.timeToMakeTurn(step):
             if self.nextLane is None:
-                # self.alive = False  #FIXME: if there is no nextLane chosen yet, pick one
                 self.pickNextLane()
-        # print "car's position from", self.trajectory.current.position, "to",
         self.trajectory.moveForward(step)
-        # print self.trajectory.current.position
-
 
     def getPreferedLane(self, turnNumber, currentLane):
-        # if turnNumber == 0:
-        #     return currentLane.leftmostAdjacent
-        # elif turnNumber == 2:
-        #     return currentLane.rightmostAdjacent
-        # else:
-        #     return currentLane
-        return currentLane
+        # TODO: if another lane has fewer cars, move to the lane
+        # get the out roads at the target intersection
+        roadNum = len(currentLane.road.getTarget().getOutRoads())
+
+        # get all lanes of current road
+        curLanes = currentLane.road.getLanes()
+
+        if roadNum == 1:  # only has one lane, no choice
+            return curLanes[0]
+
+        if turnNumber == 0:
+            return curLanes[0]
+        elif turnNumber >= roadNum - 2:
+            return curLanes[-1]
+        else:
+            return currentLane
 
     def pickNextRoad(self):
         """
@@ -176,9 +181,9 @@ class Car(object):
         """
         intersection = self.trajectory.nextIntersection()
         currentLane = self.trajectory.current.lane
-        possibleRoads = [road for road in intersection.roads if road.target != currentLane.road.source]
+        possibleRoads = [road for road in intersection.getOutRoads() if road.target != currentLane.road.source]
         if not possibleRoads:
-            possibleRoads = [road for road in intersection.getRoads()]
+            possibleRoads = [road for road in intersection.getOutRoads()]
             if not possibleRoads:
                 print "Err: There is no road to pick"
                 return None
@@ -186,30 +191,36 @@ class Car(object):
 
     def pickNextLane(self):
         if self.nextLane:
-            print 'next lane is already chosen'
-            #return  # FIXME
+            # print 'next lane is already chosen'
+            return
 
         self.nextLane = None
         nextRoad = self.pickNextRoad()
         if not nextRoad:
             return None
-        turnNumber = self.trajectory.current.lane.road.getTurnDirection(nextRoad)
-        # laneNumber = self.getLaneNumber(turnNumber, nextRoad)
-        # print "laneNumber:", laneNumber, len(nextRoad.lanes)
-        self.nextLane = nextRoad.lanes[turnNumber] if turnNumber < len(nextRoad.lanes) else None
+        # turnNumber = self.trajectory.current.lane.road.getTurnDirection(nextRoad)
+        turnNumber = self.trajectory.current.lane.getTurnDirection(nextRoad)
+        laneNumber = self.getLaneNumber(turnNumber, nextRoad)
+        # self.nextLane = nextRoad.lanes[turnNumber] if turnNumber < len(nextRoad.lanes) else None
+        self.nextLane = nextRoad.lanes[laneNumber]
         if not self.nextLane:
             print 'cannot pick next lane'
-        # print "nextLane", self.nextLane
-        # return self.nextLane
 
-    def getLaneNumber(self, turnNumber, nextRoad): #FIXME
-        # if turnNumber == 0:
-        #     return nextRoad.lanesNumber - 1
-        # elif turnNumber == 1:
-        #     return rand(0, nextRoad.lanesNumber - 1)
-        # else:
-        #     return 0
-        return 0  # now there is only one lane in each road
+    def getLaneNumber(self, turnNumber, nextRoad):
+        """
+        Get the lane number for next road.
+        :param turnNumber:
+        :param nextRoad:
+        :return:
+        """
+        totLaneNum = len(nextRoad.getLanes())
+        if totLaneNum == 1:  #only have one lane on the next road
+            return 0
+
+        if turnNumber == 0:  #turn right, return the first lane number
+            return 0
+        else:
+            return random.choice([i for i in range(1, totLaneNum)])
 
     def popNextLane(self):
         nextLane = self.nextLane
@@ -220,12 +231,12 @@ class Car(object):
     def setNextLane(self, lane):
         self.nextLane = lane
 
-    def getCurLocation(self):
-        """
-        Get the car's current coordinates and return it.
-        :return:
-        """
-        pass
+    # def getCurLocation(self):
+    #     """
+    #     Get the car's current coordinates and return it.
+    #     :return:
+    #     """
+    #     pass
 
 
 class Taxi(Car):
@@ -256,18 +267,18 @@ class Taxi(Car):
     #     """
     #     self.source = source
 
-    def setRandomAvailability(self):
-        """
-        If the distance (here we simply use direct line distance) between the previous
-        location where the availability is changed to False and the current location
-        is within some certain distance, then the availability will not change.
-        Otherwise, the availability will change randomly.
-        :return:
-        """
-        if self.available or haversine(self.source, self.getCurLocation()) >= 1:  # 1 km
-            if random.random() > 0.5:  #TODO: need to choose a better threshold?
-                self.available = not self.available
-                # self.setSource(self.getCurLocation())
+    # def setRandomAvailability(self):
+    #     """
+    #     If the distance (here we simply use direct line distance) between the previous
+    #     location where the availability is changed to False and the current location
+    #     is within some certain distance, then the availability will not change.
+    #     Otherwise, the availability will change randomly.
+    #     :return:
+    #     """
+    #     if self.available or haversine(self.source, self.getCurLocation()) >= 1:  # 1 km
+    #         if random.random() > 0.5:  #TODO: need to choose a better threshold?
+    #             self.available = not self.available
+    #             # self.setSource(self.getCurLocation())
 
     def setAvailable(self, avail):
         self.available = avail
@@ -287,7 +298,7 @@ class Taxi(Car):
     def isCalled(self):
         return self.called
 
-    def setNextLane(self, nextLane):
-        self.nextLane = nextLane
+    # def setNextLane(self, nextLane):
+    #     self.nextLane = nextLane
 
 

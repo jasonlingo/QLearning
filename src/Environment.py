@@ -5,6 +5,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from Settings import *
+from trafficSimulator.TrafficSettings import CLOSE_CRASH_LANE, CLOSE_CRASH_LANE_ALL
+from trafficSimulator.Car import Car
 
 
 class Environment(QLEnvironment):
@@ -29,6 +31,9 @@ class Environment(QLEnvironment):
         #       "intersectionId=", self.goalLocation.intersId
 
         self.goalLocation = self.realMap.getGoalLanePosition()  # Trajectory object
+        self.block = None
+        if CLOSE_CRASH_LANE:
+            self.block = self.closeLane(self.goalLocation.current.lane)
         self.reachGoal = False
         self.cars = {}
         self.taxis = {}
@@ -40,9 +45,22 @@ class Environment(QLEnvironment):
         """
         return self.realMap.randomLaneLocation()
 
+    def closeLane(self, lane):
+        """
+        Put one Car object at the begin of the lane as a block.
+        :param lane: the given lane to be blocked
+        :return: a list of block object
+        """
+        if CLOSE_CRASH_LANE_ALL:
+            block = []
+            for l in lane.road.getLanes():
+                block.append(Car(l))
+            return block
+        return [Car(lane)]
+
     def timeToGoalState(self, fromPos):
         """
-        Calculate the time from the given
+        Calculate the time from the given position to the goal position
         :param fromPos: the original position (x, y)
         :return: the time from the original position to the goal state's location
         """
@@ -70,10 +88,9 @@ class Environment(QLEnvironment):
         if self.checkArriveGoal(pos):
             return GOAL_REWARD
 
-        # TODO: modelizing
         #reward = 0.0
         # =================
-        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation.current.lane.road)/100.0)
+        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation.current.lane.road) / 100.0)
         # =================
         return reward
 

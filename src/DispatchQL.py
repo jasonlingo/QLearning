@@ -1,6 +1,6 @@
 from QLearning import QLearning
 import random
-from Settings import CHECK_INTERVAL
+from Settings import CHECK_INTERVAL, MIN_EPSILON
 
 class DispatchQL(QLearning):
     """
@@ -41,6 +41,8 @@ class DispatchQL(QLearning):
         self.updateQvalueFlag = False
         self.goal = self.exp.getGoalLocation().current.lane.road.id
 
+        self.iteration = 0
+
     def go(self, interval):
         """
         Perform learning procedure.
@@ -58,6 +60,7 @@ class DispatchQL(QLearning):
 
             keep the lastest called taxi and state
         """
+
         self.trialTime += interval
         curState = self.getState()
 
@@ -69,7 +72,6 @@ class DispatchQL(QLearning):
                 self.exp.callTaxi(taxi)
             self.updateQvalueFlag = True
             self.trialTime = 0
-
 
         # let taxis and cars move
         for ql in self.exp.calledTaxiQL:
@@ -84,6 +86,8 @@ class DispatchQL(QLearning):
             action = taxi.trajectory.current.lane.road.id
             self.learn(curState, action, reward, nextState)
             self.lastStateAction = self.currStateAction
+
+        self.iteration += 1
 
     def getState(self):
         """
@@ -102,13 +106,14 @@ class DispatchQL(QLearning):
         if self.env.isGoalReached():
             return 1000
         if action is None:
-            return  1
+            return 1
         else:
             return -1
 
     def resetTrial(self):
         self.trialTime = 0
         self.stateAction = {}
+        self.iteration = 0
 
     def learn(self, state1, action1, reward, state2):
         """
@@ -141,7 +146,8 @@ class DispatchQL(QLearning):
         """
         if not self.exp.allTaxis:
             return
-        if random.random() < self.epsilon:  # TODO: make epsilon decrease gradually
+        # if random.random() < self.epsilon:
+        if random.random() < self.exp.getEpsilon(self.epsilon, self.iteration):
             taxi = random.choice(self.exp.allTaxis)  # exploration
         else:
             taxiMapping = self.getActions()
@@ -154,7 +160,6 @@ class DispatchQL(QLearning):
             else:
                 taxi, trafficTime = self.exp.findFastestTaxi()
 
-            # if not self.exp.isQuicker(taxi, CHECK_INTERVAL):
-            #     taxi = None
+        # self.epsilon = max(self.epsilon * 0.999, MIN_EPSILON)
         return taxi
 

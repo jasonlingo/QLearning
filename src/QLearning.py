@@ -1,17 +1,17 @@
 import random
-import sys
-import Settings
+from Settings import MIN_EPSILON
 
 class QLearning(object):
     """
     A Q-learning model.
     """
 
-    def __init__(self, taxi, environment, qvalue={}, nsa={}, epsilon=0.1, alpha=0.1, gamma=0.9):
+    def __init__(self, taxi, exp, env, qvalue=None, nsa=None, epsilon=0.1, alpha=0.1, gamma=0.9):
         """
         Args:
             taxi: the assigned taxi
-            environment: the environment for this Q learning to interact with
+            exp: experiment
+            env: the environment for this Q learning to interact with
             qvalue: Q-value table
             nsa: the table records the times of each state that has been reached
             epsilon: a exploration parameter
@@ -20,20 +20,24 @@ class QLearning(object):
         Returns:
         """
         self.taxi = taxi
-        self.env = environment
+        self.exp = exp
+        self.env = env
         self.epsilon = epsilon
+        self.defaultEps = epsilon
         self.alpha = alpha
         self.gamma = gamma
 
         # Q value lookup dictionary
         # {((x, y), action): Q value}
-        self.qvalue = qvalue
+        self.qvalue = qvalue if qvalue is not None else {}
 
         # record the visited times for state-action
-        self.nsa = nsa
+        self.nsa = nsa if nsa is not None else {}
 
         # for checking oscillation
         self.steps = {}
+
+        self.iteration = 0
 
     def go(self, second):
         """
@@ -48,7 +52,7 @@ class QLearning(object):
             self.learn(oldPos, oldPos, reward, oldPos)
             return
 
-        action = self.chooseAction(oldPos)  # road
+        action = self.chooseAction(oldPos)           # road
         self.taxi.setNextLane(action.lanes[0])
         self.taxi.move(second)
         nextPos = self.taxi.getPosition().lane.road  # current road
@@ -63,6 +67,8 @@ class QLearning(object):
 
         if self.env.checkArriveGoal(nextPos):
             self.env.setReachGoal(True)
+
+        self.iteration += 1
 
     def learn(self, state1, action1, reward, state2):
         """
@@ -95,12 +101,13 @@ class QLearning(object):
         """
         actions = self.env.getAction(state)  # roads
 
-        if random.random() < self.epsilon:
+        if random.random() < self.exp.getEpsilon(self.epsilon, self.iteration):
             action = random.choice(actions)  # exploration
         else:
             q = [self.qvalue.get((state, a), 0.0) for a in actions]
             maxQIdx = q.index(max(q))
             action = actions[maxQIdx]
+
         return action
 
     def getTaxi(self):
