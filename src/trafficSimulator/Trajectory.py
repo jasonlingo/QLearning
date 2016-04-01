@@ -101,7 +101,7 @@ class Trajectory(object):
         return self.current.lane.road.target
 
     def previousIntersection(self):
-        return self.lane.road.source
+        return self.current.lane.road.getSource()
 
     def isValidTurn(self):
         nextLane = self.car.nextLane
@@ -202,7 +202,7 @@ class Trajectory(object):
             print "not neighbouring lanes"
             return
         nextPosition = self.current.position + 3 * self.car.length
-        if nextPosition >= self.lane.length:
+        if nextPosition >= self.current.lane.length:
             print "too late to change lane"
             return
         return self.startChangingLanes(nextLane, nextPosition)

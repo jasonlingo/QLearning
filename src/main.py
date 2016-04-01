@@ -9,11 +9,14 @@ import time
 
 
 if __name__ == '__main__':
+
+    DEBUG = False
+
     def runExp():
         """
         Perform the learning process for EXP_NUM trials.
         """
-        while not realMap.isAniMapPlotOk():
+        while not realMap.isAniMapPlotOk() and not DEBUG:
             time.sleep(1)
         for i in range(EXP_NUM):
             print "========== " + str(i+1) + "-th trial =========="
@@ -25,15 +28,15 @@ if __name__ == '__main__':
         # experiment.printNSA()
         # experiment.showMap()
 
-    def updateSignal():
-        """
-        update the traffic signal of each intersection according to the given time interval.
-        :param time: (int) second
-        """
-        print "updating signals"
-        signalInterval = 1
-        env.updateContralSignal(signalInterval)
-        time.sleep(signalInterval)
+    # def updateSignal():
+    #     """
+    #     update the traffic signal of each intersection according to the given time interval.
+    #     :param time: (int) second
+    #     """
+    #     print "updating signals"
+    #     signalInterval = 1
+    #     env.updateContralSignal(signalInterval)
+    #     time.sleep(signalInterval)
 
     # Create a RealMap object and pass it to a Environment object.
     realMap = RealMap(SHAPEFILE)
@@ -41,14 +44,12 @@ if __name__ == '__main__':
     exp = Experiment(env, TAXI_NUM, CAR_NUM, epsilon=EPSILON, alpha=ALPHA, gamma=GAMMA)
 
     # For debug use
-    # runExp()
+    if DEBUG:
+        runExp()
 
-    # Simulation thread
+    # Traffic simulator thread
     simulation = threading.Thread(target=runExp)
     simulation.start()
-    # signal updating thread
-    # signalThread = threading.Thread(target=updateSignal)
-    # signalThread.start()
 
     # plot the animated map
     fig, ax = plt.subplots(figsize=(10, 8))
