@@ -55,5 +55,5 @@ class Intersection(object):
     def buildControlSignal(self):
         self.controlSignals.generateState()
 
-    def getTurnDirection(self, lane):
-        return self.controlSignals.getTurnDirection(lane)
+    # def getTurnDirection(self, lane):
+    #     return self.controlSignals.getTurnDirection(lane)

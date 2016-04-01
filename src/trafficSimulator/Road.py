@@ -1,7 +1,7 @@
 from Traffic import *
-from Traffic import RoadType
 from Lane import Lane
-
+from TrafficSettings import MAX_ROAD_LANE_NUM
+import random
 
 class Road(object):
     """
@@ -77,7 +77,6 @@ class Road(object):
         self.avgSpeed = sum(self.recentSpeedList) / len(self.recentSpeedList)
         print self.avgSpeed
 
-
     def getAvgSpeed(self):
         return max(self.avgSpeed, 1.0)
 
@@ -100,19 +99,19 @@ class Road(object):
                 return True
         return False
 
-    def addIntersection(self, intersection):
-        self.connectedIntersections.append(intersection)
+    # def addIntersection(self, intersection):
+    #     self.connectedIntersections.append(intersection)
 
     def leftMostLane(self):
         if self.lanes:
-            return self.lanes[-1]
+            return self.lanes[0]
 
     def rightMostLane(self):
         if self.lanes:
-            return self.lanes[0]
+            return self.lanes[-1]
 
-    def setAvgSpeed(self, speed):
-        self.avgSpeed = speed
+    # def setAvgSpeed(self, speed):
+    #     self.avgSpeed = speed
 
     def setSource(self, source):
         self.source = source
@@ -151,7 +150,6 @@ class Road(object):
     def update(self):
         if not self.source or not self.target:
             return
-        # ToDo: check
         # self.sourceSideId = self.source.rect.getSectorId(self.target.rect.center())
         # self.sourceSide = self.source.rect.getSide(self.sourceSideId).subsegment(0.5, 1.0)
         # self.targetSideId = self.target.rect.getSectorId(self.source.rect.center())
@@ -177,5 +175,7 @@ class Road(object):
         #     self.lanes[i].rightmostAdjacent = self.lanes[0]
             # results.append(self.lanes[i].update())
         # return results
-        if not self.lanes:
+        # if not self.lanes:
+        #     self.lanes.append(Lane(self))
+        while len(self.lanes) < MAX_ROAD_LANE_NUM:
             self.lanes.append(Lane(self))

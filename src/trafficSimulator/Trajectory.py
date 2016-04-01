@@ -65,17 +65,17 @@ class Trajectory(object):
         # if self.temp.lane:
         #     return self.getAbsolutePosition() / self.temp.lane.length
         # else:
-        return self.getAbsolutePosition() / self.current.lane.length
+        return self.getAbsolutePosition() / self.current.lane.getLength()
 
         # return self.getAbsolutePosition() / (float(self.temp.lane.length) if self.temp.lane else float(self.current.lane.length)
         # return self.current.position
 
-    def getDirection(self):
-        # if self.temp.lane:
-        #     return self.temp.lane.getDirection(self.getRelativePosition())
-        # else:
-        return self.current.lane.getDirection(self.getRelativePosition())
-        # return self.lane.getDirection(self.getRelativePosition())
+    # def getDirection(self):
+    #     # if self.temp.lane:
+    #     #     return self.temp.lane.getDirection(self.getRelativePosition())
+    #     # else:
+    #     return self.current.lane.getDirection(self.getRelativePosition())
+    #     # return self.lane.getDirection(self.getRelativePosition())
 
     def getCoords(self):
         # if self.temp.lane:
@@ -109,16 +109,16 @@ class Trajectory(object):
         if not nextLane:
             print "no road to enter"
             return False
-        turnNumber = sourceLane.getTurnDirection(nextLane)
-        if turnNumber == 3:
-            print "no U-turns are allowed"
-            return False
-        if turnNumber == 0 and not sourceLane.isLeftmost:
-            print "no left turns from this lane"
-            return False
-        if turnNumber == 2 and not sourceLane.isRightmost:
-            print "no right turns from this lane"
-            return False
+        # turnNumber = sourceLane.getTurnDirection(nextLane)
+        # if turnNumber == 3:
+        #     print "no U-turns are allowed"
+        #     return False
+        # if turnNumber == 0 and not sourceLane.isLeftmost:
+        #     print "no left turns from this lane"
+        #     return False
+        # if turnNumber == 2 and not sourceLane.isRightmost:
+        #     print "no right turns from this lane"
+        #     return False
         return True
 
     def canEnterIntersection(self):
@@ -141,7 +141,7 @@ class Trajectory(object):
         Note: the distance of this move is already added to this car's position
         :return: the distance from this car's position to the center of the intersection
         """
-        distance = self.current.lane.length - self.current.position - (self.car.length / 2.0)
+        distance = self.current.lane.getLength() - self.current.position - (self.car.length / 2.0)
         if not self.isChangingLanes:
             return max(distance, 0)
         else:
@@ -202,7 +202,7 @@ class Trajectory(object):
             print "not neighbouring lanes"
             return
         nextPosition = self.current.position + 3 * self.car.length
-        if nextPosition >= self.current.lane.length:
+        if nextPosition >= self.current.lane.getLength():
             print "too late to change lane"
             return
         return self.startChangingLanes(nextLane, nextPosition)
@@ -237,8 +237,8 @@ class Trajectory(object):
 
         self.next.lane = nextLane
         nextLaneCar, nextLaneCarPosition = self.next.nextCarDistance()
-        nextLaneCarPosition = nextLaneCarPosition if nextLaneCar else self.next.lane.length
-        remainderDistance = max(self.current.position - self.current.lane.length, 0)
+        nextLaneCarPosition = nextLaneCarPosition if nextLaneCar else self.next.lane.getLength()
+        remainderDistance = max(self.current.position - self.current.lane.getLength(), 0)
         nextPosition = min(remainderDistance, nextLaneCarPosition)
         self.next.position = nextPosition
 

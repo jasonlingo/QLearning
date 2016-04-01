@@ -1,6 +1,6 @@
+from __future__ import division
 import sys
-from Traffic import haversine
-
+from TrafficSettings import MAX_SPEED
 
 class Lane(object):
     """
@@ -14,35 +14,45 @@ class Lane(object):
         """
         # TODO: move speed parameter to class Lane?
         self.road = road
-        self.source = road.source
-        self.target = road.target
-        self.leftAdjacent = None
-        self.rightAdjacent = None
-        self.leftmostAdjacent = None
-        self.rightmostAdjacent = None
-        self.length = haversine(self.source.center, self.target.center)
+        # self.leftAdjacent = None
+        # self.rightAdjacent = None
+        # self.leftmostAdjacent = None
+        # self.rightmostAdjacent = None
+        # self.length = haversine(self.source.center, self.target.center)
         # self.middleLine = None
         self.carsPosition = {}
 
         # self.update()
 
-    def getSourceSideId(self):
-        return self.road.sourceSideId
-
-    def getTargetSideId(self):
-        return self.road.targetSideId
-
-    def getSideId(self):
-        roads = self.road
+    # def getSourceSideId(self):
+    #     return self.road.sourceSideId
+    #
+    # def getTargetSideId(self):
+    #     return self.road.targetSideId
+    #
+    # def getSideId(self):
+    #     roads = self.road
 
     def getRoadId(self):
         return self.road.id
 
-    def isRightmost(self):
-        return self == self.rightmostAdjacent
+    # def isRightmost(self):
+    #     return self == self.rightmostAdjacent
+    #
+    # def isLeftmost(self):
+    #     return self == self.leftmostAdjacent
 
-    def isLeftmost(self):
-        return self == self.leftmostAdjacent
+    def getSource(self):
+        """Get source intersection"""
+        return self.road.getSource()
+
+    def getTarget(self):
+        """Get target intersection"""
+        return self.road.getTarget()
+
+    def getLength(self):
+        """Get the length of this lane (equals to the length of road)"""
+        return self.road.getLength()
 
     # def getLeftBorder(self):
     #     return Segment(self.sourceSegment.source, self.targetSegment.target)
@@ -55,11 +65,11 @@ class Lane(object):
     #     self.length = self.middleLine.length
     #     self.direction = self.middleLine.direction
 
-    def getTurnDirection(self, other):
-        return self.road.getTurnDirection(other.road)  # it now only returns 0
+    # def getTurnDirection(self, other):
+    #     return self.road.getTurnDirection(other.road)
 
-    def getDirection(self):
-        return self.direction
+    # def getDirection(self):
+    #     return self.direction
 
     def getPoint(self, a):
         """
@@ -67,8 +77,8 @@ class Lane(object):
         :param a: the relative position from 0(source) to 1(target)
         :return: (longitude, latitude)
         """
-        lng = self.source.center.lng + (self.target.center.lng - self.source.center.lng) * min(a, 1)
-        lat = self.source.center.lat + (self.target.center.lat - self.source.center.lat) * min(a, 1)
+        lng = self.getSource().center.lng + (self.getTarget().center.lng - self.getSource().center.lng) * min(a, 1)
+        lat = self.getSource().center.lat + (self.getTarget().center.lat - self.getSource().center.lat) * min(a, 1)
         return lng, lat
 
     def addCarPosition(self, carPos):
@@ -80,6 +90,13 @@ class Lane(object):
             print "car is already here"
         else:
             self.carsPosition[carPos.id] = carPos
+
+    def getCurAvgLaneSpeed(self):
+        carsSpd = [pos.car.getSpeed() for pos in self.carsPosition.values()]
+        if len(carsSpd) > 0:
+            return sum(carsSpd) / len(carsSpd)
+        else:
+            return MAX_SPEED
 
     def removeCar(self, carPos):
         if carPos.id not in self.carsPosition:

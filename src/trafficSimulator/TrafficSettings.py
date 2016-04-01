@@ -18,6 +18,9 @@ TAXI_NUMBER = 20
 SHAPEFILE_NAME = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"
 MAX_SPEED = 60.0
 
+MAX_ROAD_LANE_NUM = 2
+"""Maximum lanes per road"""
+
 
 ANIMATION_LAPSE = 100
 """The interval (millisecond) between two animation frame"""

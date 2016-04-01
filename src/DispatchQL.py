@@ -70,7 +70,6 @@ class DispatchQL(QLearning):
             self.updateQvalueFlag = True
             self.trialTime = 0
 
-
         # let taxis and cars move
         for ql in self.exp.calledTaxiQL:
             ql.go(interval)
@@ -102,7 +101,7 @@ class DispatchQL(QLearning):
         if self.env.isGoalReached():
             return 1000
         if action is None:
-            return  1
+            return 1
         else:
             return -1
 

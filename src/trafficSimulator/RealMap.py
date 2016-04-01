@@ -10,7 +10,7 @@ import pygmaps
 import webbrowser
 import time
 
-from Dijkstra import *
+from src.Dijkstra import *
 
 
 class RealMap(object):
@@ -169,7 +169,7 @@ class RealMap(object):
             if tmp.getSource() and tmp.getTarget():
                 rd = tmp
         lane = random.choice(rd.lanes)
-        position = random.random() * lane.length
+        position = random.random() * lane.getLength()
         return lane, position
 
     def setRandomGoalPosition(self):  # TODO: consider move to Experiment or Environment
@@ -233,7 +233,7 @@ class RealMap(object):
         :param position: the given position to check
         :return: True if the car is not overlapped with existing cars; False otherwise
         """
-        half = 0.0025 / lane.length  # TODO: consider different car length
+        half = 0.0025 / lane.getLength()  # TODO: consider different car length
         for (start, end) in self.locDict[lane]:
             if start <= position + half <= end or start <= position - half <= end:
                 return False

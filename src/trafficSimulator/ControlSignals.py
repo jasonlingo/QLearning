@@ -119,9 +119,9 @@ class ControlSignals(object):
             self.generateState()
 
         if isInRoad:
-            targetPoint = lane.source.center.getCoords()
+            targetPoint = lane.getSource().center.getCoords()
         else:
-            targetPoint = lane.target.center.getCoords()
+            targetPoint = lane.getTarget().center.getCoords()
 
         for i in range(len(self.inRoads)):
             qd, road = self.inRoads[i]

@@ -28,7 +28,7 @@ class LanePosition(object):
         self.lane = lane
 
     def relativePosition(self):
-        return self.position / float(self.lane.length)
+        return self.position / float(self.lane.getLength())
 
     def nextCarDistance(self):
         nextList = self.getNext()  # this method return a list of LanePosition
