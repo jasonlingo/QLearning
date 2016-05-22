@@ -1,10 +1,13 @@
-import math
-from trafficSimulator.RealMap import RealMap
-from QLEnvironment import QLEnvironment
+from __future__ import division
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from Settings import *
+
+import math
+from trafficSimulator.TrafficSettings import CLOSE_CRASH_LANE, CLOSE_ALL_CRASH_LANES
+from QLEnvironment import QLEnvironment
+from Settings import GOAL_REWARD
+from trafficSimulator.Car import Car, Taxi
 
 
 class Environment(QLEnvironment):
@@ -19,16 +22,13 @@ class Environment(QLEnvironment):
         :return:
         """
         self.realMap = realMap
-
-        # TODO: add speed for each road
-        # self.map.generateSubRegion(Settings.SUB_REGION_NUM)
-        # self.map.generateMapByDeletion(Settings.DELETE_ROAD_NUM)
-
-        # print "Goal location: coordinate=", self.goalLocation.coordinates, \
-        #       "roadId=", self.goalLocation.roadId, \
-        #       "intersectionId=", self.goalLocation.intersId
-
         self.goalLocation = self.realMap.getGoalLanePosition()  # Trajectory object
+
+        # block the goal road, only allow cars move out of the road
+        self.block = None
+        if CLOSE_CRASH_LANE:
+            self.block = self.closeLane(self.goalLocation.current.lane)
+
         self.reachGoal = False
         self.cars = {}
         self.taxis = {}
@@ -39,6 +39,25 @@ class Environment(QLEnvironment):
         :return: the selected lane and position.
         """
         return self.realMap.randomLaneLocation()
+
+    def closeLane(self, lane):
+        """
+        Put one Car object as a block at the begin of the lane.
+        If CLOSE_ALL_CRASH_LANES == True, close all lanes of the road where a car crash happens
+        If CLOSE_ALL_CRASH_LANES == False, only close the the lane where a car crash happens
+
+        :param lane: the given lane to be blocked
+        :return: a list of block object
+        """
+        if CLOSE_ALL_CRASH_LANES:
+            block = []
+            for la in lane.road.getLanes():
+                la.setBlocked(True)
+                block.append(Car(la))
+            return block
+        else:
+            lane.setBlocked(True)
+            return [Car(lane)]
 
     def timeToGoalState(self, fromPos):
         """
@@ -73,7 +92,7 @@ class Environment(QLEnvironment):
         # TODO: modelizing
         #reward = 0.0
         # =================
-        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation.current.lane.road)/100.0)
+        reward = -1.0 + math.pow(10, -self.realMap.trafficTime(pos, self.goalLocation.current.lane.road) / 100.0)
         # =================
         return reward
 
@@ -108,11 +127,11 @@ class Environment(QLEnvironment):
         return False
 
     def addRandomCars(self, num):
-        self.realMap.addRandomCars(num)
+        self.realMap.addRandomCars(num, "car")
         self.cars = self.realMap.getCars()
 
     def addRandomTaxis(self, num):
-        self.realMap.addRandomTaxi(num)
+        self.realMap.addRandomCars(num, "taxi")
         self.taxis = self.realMap.getTaxis()
 
     def cleanCars(self):

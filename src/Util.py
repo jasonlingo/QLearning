@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 
 
@@ -48,7 +49,7 @@ class PriorityQueue(object):
 
     def printQueue(self):
         for key in sorted(self.heap.keys()):
-            print key,": ", self.heap[key]
+            print (key,": ", self.heap[key])
 
 
 def BFS(map, source, dest):
@@ -84,5 +85,4 @@ def adjacent(map, pos):
     if map.checkRoadPoint(pos[0]-1, pos[1]):
         adj.append((pos[0]-1, pos[1]))
     return adj
-
 

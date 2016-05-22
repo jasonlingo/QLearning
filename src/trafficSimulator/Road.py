@@ -1,7 +1,9 @@
-from Traffic import *
+from __future__ import division
+from Traffic import Traffic, RoadType, calcVectAngle, haversine
 from Lane import Lane
 from TrafficSettings import MAX_ROAD_LANE_NUM
-import random
+import sys
+import numpy as np
 
 class Road(object):
     """
@@ -24,8 +26,8 @@ class Road(object):
 
         self.top, self.bottom, self.right, self.left = self.parseCorners(corners)
         self.defaultSpeed = speed
-        self.avgSpeed = speed
-        self.recentSpeedList = [speed]
+        self.avgSpeed = 0
+        self.recentSpeedList = []
         self.id = Traffic.uniqueId(RoadType.ROAD)
         self.lanes = []
         self.lanesNumber = None
@@ -33,7 +35,7 @@ class Road(object):
         self.setLength()
         self.targetSide = None
         self.sourceSide = None
-        self.targetSideId = 0 #fixme
+        self.targetSideId = 0
         self.sourceSideId = 0
         self.update()
 
@@ -66,19 +68,25 @@ class Road(object):
 
     def updateAvgSpeed(self):
         """
-        Calculate the average speed of the recent speed data (at most 50 records) of this road.
-        Then set the result to self.avgSpeed.
+        Calculate the average speed of the recent speed data (most recent 100 records) of this road.
+        Then store the result to "self.avgSpeed."
         """
         print "update avg speed:", self.id, self.avgSpeed, "->",
         curAvgSpeed = self.getCurAvgSpeed()
-        if self.recentSpeedList >= 50:
-            self.recentSpeedList.pop()
+        deleteSpeed = None
+        if self.recentSpeedList >= 100:
+            deleteSpeed = self.recentSpeedList.pop(0)
         self.recentSpeedList.append(curAvgSpeed)
-        self.avgSpeed = sum(self.recentSpeedList) / len(self.recentSpeedList)
+
+        if deleteSpeed:
+            self.avgSpeed = (self.avgSpeed * len(self.recentSpeedList) - deleteSpeed + curAvgSpeed) / len(self.recentSpeedList)
+        else:
+            self.avgSpeed = (self.avgSpeed * (len(self.recentSpeedList) - 1) + curAvgSpeed) / len(self.recentSpeedList)
+
         print self.avgSpeed
 
     def getAvgSpeed(self):
-        return max(self.avgSpeed, 1.0)
+        return max(self.avgSpeed, 0.0)
 
     def setLength(self):
         """
@@ -101,6 +109,17 @@ class Road(object):
 
     # def addIntersection(self, intersection):
     #     self.connectedIntersections.append(intersection)
+
+    def isBlocked(self):
+        """
+        If all the lanes of this road are blocked, return True, else return False
+        :return (boolean):
+        """
+        for lane in self.lanes:
+            if not lane.isBlocked():
+                return False
+
+        return True
 
     def leftMostLane(self):
         if self.lanes:
@@ -134,18 +153,68 @@ class Road(object):
             self.setLength()
         return self.length
 
-    def getTurnDirection(self, other):
+    def getLanes(self):
+        return self.lanes
+
+    def getFastestLane(self):
+        candidateLanes = [lane for lane in self.lanes if not lane.isBlocked()]
+        fastestSpeed = candidateLanes[0].getAvgSpeed()
+        fastestLane = candidateLanes[0]
+        for lane in candidateLanes[1:]:
+            avgSpeed = lane.getAvgSpeed()
+            if avgSpeed > fastestSpeed:
+                fastestSpeed = avgSpeed
+                fastestLane = lane
+        return fastestLane
+
+    # def getTurnDirection(self, other):
+    #     """
+    #     Each road has only one lane for now. So it returns 0.
+    #     :param other: the next road
+    #     :return: the turn number
+    #     """
+    #     if self.target != other.source:
+    #         print "invalid roads"
+    #         return
+    #     # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4 #FIXME: this is the original version
+    #
+    #     return random.choice([x for x in range(len(other.lanes))])
+
+    def getTurnDirection(self, nextRoad):
         """
-        Each road has only one lane for now. So it returns 0.
-        :param other: the next road
+        Find the road of the next turn and return the corresponding road order.
+        Ex:
+              |  ^|
+        ______|  1|______
+          << 2
+        ______     0>>___
+              |3 ^|
+              |V ^|
+
+        :param nextRoad: the next road
         :return: the turn number
         """
-        if self.target != other.source:
-            print "invalid roads"
-            return
-        # return (other.sourceSideId - self.targetSideId - 1 + 8) % 4 #FIXME: this is the original version
+        if self.target != nextRoad.source:
+            print "invalid turn"
+            sys.exit(2)
 
-        return random.choice([x for x in range(len(other.lanes))])
+        # need to determine the turn to the next road (other)
+        roadOrder = []
+        sourceVec = np.array(self.getSource().center.getCoords()) - np.array(self.getTarget().center.getCoords())
+
+        # calculate the angle of the turn to each road that connects with the target intersection of current road
+        for road in self.target.getOutRoads():
+            targetVec = np.array(road.getTarget().center.getCoords()) - np.array(road.getSource().center.getCoords())
+            angle = calcVectAngle(sourceVec, targetVec)
+            if angle == 0:
+                angle = 360
+            roadOrder.append((angle, road))
+
+         # sort by the angle in ascending order
+        roadOrder.sort()
+        for i, roadTup in enumerate(roadOrder):
+            if roadTup[1] == nextRoad:
+                return i
 
     def update(self):
         if not self.source or not self.target:

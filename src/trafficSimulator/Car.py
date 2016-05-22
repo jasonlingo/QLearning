@@ -1,7 +1,8 @@
+from __future__ import division
 import math
 from Trajectory import Trajectory
 from Traffic import *
-from TrafficSettings import *
+from TrafficSettings import CAR_LENGTH
 import sys
 
 
@@ -19,8 +20,8 @@ class Car(object):
         """
         self.id = Traffic.uniqueId(carType)
         self.speed = 0
-        self.width = 0.0018     # the unit used here is km
-        self.length = 0.0045    # the length (km) of this car
+        #self.width = CAR_WIDTH      # the unit used here is km
+        self.length = CAR_LENGTH    # the length (km) of this car
         self.maxSpeed = maxSpeed
         self.trajectory = Trajectory(self, lane, position)
         self.nextLane = None
@@ -29,6 +30,8 @@ class Car(object):
         self.isTaxi = False
 
     def __eq__(self, other):
+        if not other:
+            return False
         return self.id == other.id
 
     def __hash__(self):
@@ -67,7 +70,7 @@ class Car(object):
         Get the current direction of this car.
         :return:
         """
-        return self.trajectory.direction
+        return self.trajectory.direction  #FIXME: error attribute
 
     def release(self):
         self.trajectory.release()
@@ -98,8 +101,6 @@ class Car(object):
         else:
             busyRoadCoeff = sys.maxint
 
-        # print "distanceToNextCar", distanceToNextCar,
-
         safeIntersectionDist = 0.001 + timeGap + pow(self.speed, 2) / (2 * maxDeceleration)
         if self.trajectory.distanceToStopLine() > 0:
             safeInterDistRatio = (safeIntersectionDist / float(self.trajectory.distanceToStopLine() if self.trajectory.distanceToStopLine() > 0 else 0.0001))
@@ -107,16 +108,7 @@ class Car(object):
         else:
             intersectionCoeff = sys.maxint
 
-        # print "distanceToStopLine", self.trajectory.distanceToStopLine()
-
         coeff = 1 - freeRoadCoeff - busyRoadCoeff - intersectionCoeff
-        # if coeff < 0:
-        #     print "coeff", coeff
-        # return round(max(min(maxAcceleration * coeff, maxAcceleration), -maxDeceleration), 10)
-        # if coeff <= 0:
-        #     print "car slow down or stops"
-        # else:
-        #     print "car is accelerating"
         return round(maxAcceleration * coeff, 10)
 
     def move(self, second):
@@ -129,87 +121,79 @@ class Car(object):
         :param second: the given time interval in second
         """
         acceleration = self.getAcceleration()
-
-        # print "speed", self.speed, acceleration
-        # self.speed += acceleration * second * 3600  # convert km/s to km/h
         self.setSpeed(self.speed + acceleration * second * 3600)
 
         # if (not self.trajectory.isChangingLanes) and self.nextLane:
         #     currentLane = self.trajectory.current.lane
-        #     turnNumber = currentLane.getTurnDirection(self.nextLane)  # FIXME: it now only returns 0
-        #     preferedLane = self.getPreferedLane(turnNumber, currentLane)
-        #     if preferedLane != currentLane:  #FIXME: it only returns the currentLane
-        #         self.trajectory.changeLane(preferedLane)
+        #     turnNumber = currentLane.getTurnDirection(self.nextLane)
+
+        # choose a quicker lane
+        # currentLane = self.trajectory.current.lane
+        # preferedLane = self.getPreferedLane()
+        # if preferedLane != currentLane:
+        #     self.trajectory.switchLane(preferedLane)
 
         step = max(self.speed * second / 3600.0 + 0.5 * acceleration * math.pow(second, 2), 0)
-        # print "car's speed", self.speed
-        # if self.speed <= 0:
-        #     print "car stops"
         nextCarDist = max(self.trajectory.nextCarDistance()[1], 0)
-        # if nextCarDist < step:
-            # print 'step is longer than the distance to the next car'
 
         step = min(nextCarDist, step)
         if self.trajectory.timeToMakeTurn(step):
             if self.nextLane is None:
-                # self.alive = False  #FIXME: if there is no nextLane chosen yet, pick one
                 self.pickNextLane()
-        # print "car's position from", self.trajectory.current.position, "to",
         self.trajectory.moveForward(step)
-        # print self.trajectory.current.position
 
+    def getPreferedLane(self):
+        """
+        Choose the faster lane of current road
+        :param turnNumber:
+        :param currentLane:
+        :return:
+        """
+        # TODO: now it only has at most 2 lanes of a road. when the number of lanes per road
+        # is large than 2, then the car can only change to the neighbor lanes.
 
-    def getPreferedLane(self, turnNumber, currentLane):
-        # if turnNumber == 0:
-        #     return currentLane.leftmostAdjacent
-        # elif turnNumber == 2:
-        #     return currentLane.rightmostAdjacent
-        # else:
-        #     return currentLane
-        return currentLane
+        # current lane only has this car, no need to switch lane.
+        if len(self.trajectory.current.lane.carsPosition) == 1:
+            return self.trajectory.current.lane
+        return self.trajectory.current.lane.road.getFastestLane()
 
     def pickNextRoad(self):
         """
         Randomly pick the next road from the outbound roads of the target intersection.
         The car cannot make a U-turn unless there is no other road.
+        The car cannot go to a blocked road.
+
         :return: a randomly picked road.
         """
         intersection = self.trajectory.nextIntersection()
         currentLane = self.trajectory.current.lane
-        possibleRoads = [road for road in intersection.roads if road.target != currentLane.road.source]
+        possibleRoads = [road for road in intersection.outRoads
+                         if road.target != currentLane.road.source and not road.isBlocked()]
         if not possibleRoads:
-            possibleRoads = [road for road in intersection.getRoads()]
+            possibleRoads = [road for road in intersection.getOutRoads()]
             if not possibleRoads:
                 print "Err: There is no road to pick"
                 return None
         return sample(possibleRoads, 1)[0]
 
     def pickNextLane(self):
-        if self.nextLane:
-            print 'next lane is already chosen'
-            #return  # FIXME
-
-        self.nextLane = None
         nextRoad = self.pickNextRoad()
         if not nextRoad:
             return None
-        turnNumber = self.trajectory.current.lane.road.getTurnDirection(nextRoad)
-        # laneNumber = self.getLaneNumber(turnNumber, nextRoad)
-        # print "laneNumber:", laneNumber, len(nextRoad.lanes)
-        self.nextLane = nextRoad.lanes[turnNumber] if turnNumber < len(nextRoad.lanes) else None
+        # turnNumber = self.trajectory.current.lane.getTurnDirection(nextRoad)
+        # laneNumber = self.getLaneNumber(nextRoad)
+        # self.nextLane = nextRoad.lanes[laneNumber]
+        self.nextLane = self.getLaneNumber(nextRoad)
         if not self.nextLane:
             print 'cannot pick next lane'
-        # print "nextLane", self.nextLane
-        # return self.nextLane
 
-    def getLaneNumber(self, turnNumber, nextRoad): #FIXME
-        # if turnNumber == 0:
-        #     return nextRoad.lanesNumber - 1
-        # elif turnNumber == 1:
-        #     return rand(0, nextRoad.lanesNumber - 1)
-        # else:
-        #     return 0
-        return 0  # now there is only one lane in each road
+    def getLaneNumber(self, nextRoad):
+        """
+        Choose a lane that has faster average speed.
+        :param nextRoad:
+        :return:
+        """
+        return nextRoad.getFastestLane()
 
     def popNextLane(self):
         nextLane = self.nextLane

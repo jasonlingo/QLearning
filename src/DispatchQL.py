@@ -59,7 +59,7 @@ class DispatchQL(QLearning):
             keep the lastest called taxi and state
         """
         self.trialTime += interval
-        curState = self.getState()
+        curState = self.getState()   # TODO: change to the sample of the speed of all roads
 
         taxi = None
         if self.trialTime >= CHECK_INTERVAL:
@@ -129,7 +129,7 @@ class DispatchQL(QLearning):
 
     def chooseAction(self, state):
         """
-        1. Randomly choose an action if the random variable is less than the
+        1. Randomly choose an action (taxi) if the random variable is less than the
            epsilon.
         2. Choose the action that has the highest q value of the given state.
         3. Choose the quickest taxi.
@@ -140,8 +140,10 @@ class DispatchQL(QLearning):
         """
         if not self.exp.allTaxis:
             return
+
         if random.random() < self.epsilon:  # TODO: make epsilon decrease gradually
-            taxi = random.choice(self.exp.allTaxis)  # exploration
+            # exploration
+            taxi = random.choice(self.exp.allTaxis)
         else:
             taxiMapping = self.getActions()
             actions = taxiMapping.keys()
@@ -151,7 +153,8 @@ class DispatchQL(QLearning):
                 action = actions[maxQIdx]
                 taxi = taxiMapping[action]
             else:
-                taxi, trafficTime = self.exp.findFastestTaxi()
+                # taxi, trafficTime = self.exp.findFastestTaxi()
+                taxi = random.choice(self.exp.allTaxis)
 
             # if not self.exp.isQuicker(taxi, CHECK_INTERVAL):
             #     taxi = None

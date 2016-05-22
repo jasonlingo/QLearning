@@ -1,5 +1,5 @@
 import random
-from math import radians, cos, sin, asin, sqrt
+from math import radians, cos, sin, asin, sqrt, atan2, pi
 from TrafficSettings import *
 from collections import defaultdict
 
@@ -40,6 +40,7 @@ def shuffle(obj):
     shuffled = obj[:]
     random.shuffle(shuffled)
     return shuffled
+
 
 def rand(min, max):
     return random.choice([x for x in range(min, max+1)])
@@ -95,3 +96,17 @@ def haversine(point1, point2):
     else:
         r = EARTH_RADIUS_MILE  # The radius of earth in miles.
     return c * r
+
+
+def calcVectAngle(vec1, vec2):
+    """
+    Calculate the clock-wise angle between two vectors.
+    :param vec1: (float, float) the first vector that is used as the starting point for
+                 the angle.
+    :param vec2: (float, float) the second vector
+    """
+    angle = atan2(vec1[0], vec1[1]) - atan2(vec2[0], vec2[1])
+    angle = angle * 360 / (2 * pi)
+    if angle < 0:
+        angle += 360
+    return angle

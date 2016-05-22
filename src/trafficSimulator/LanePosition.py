@@ -1,3 +1,4 @@
+from __future__ import division
 from Traffic import *
 import sys
 
@@ -28,27 +29,53 @@ class LanePosition(object):
         self.lane = lane
 
     def relativePosition(self):
-        return self.position / float(self.lane.getLength())
+        return self.position / self.lane.getLength()
+
+    def getPosition(self):
+        """ return current position (km) from source intersection """
+        return self.position
+
+    def setPosition(self, pos):
+        self.position = pos
+
+    def addPosition(self, pos):
+        self.position = max(0, self.position + pos)
+        self.position = min(self.position, self.lane.getLength())
 
     def nextCarDistance(self):
-        nextList = self.getNext()  # this method return a list of LanePosition
-        nextCar = None
-        nextRearPos = sys.maxint
+        """
+        Find the nearest car in front of this car and the distance.
+        :return: the nearest car, distance (km)
+        """
+        # get a list of LanePosition in front of this car
+        nextLanePossitions = self.getNext()
+        # calculate the front position of this car
         frontPosition = self.position + self.car.length / 2.0
-        for lanePosition in nextList:
-            if lanePosition.isGoal() and not self.car.isTaxi:
-                continue
-            rearPosition = lanePosition.position - (lanePosition.car.length / 2.0 if lanePosition.car else 0)  # the next.car might be the crash's location and will be None
-            if rearPosition < nextRearPos and rearPosition >= frontPosition:
+
+        # find the nearest car in front of this car
+        nextCar = None
+        nextRearPos = self.lane.getLength() if self.lane else sys.maxint
+        for lanePosition in nextLanePossitions:
+            # if lanePosition.isGoal() and not self.car.isTaxi: # FIXME: check if still need this
+            #     continue
+            rearPosition = lanePosition.position - (lanePosition.car.length / 2.0 if lanePosition.car else 0)
+            if frontPosition <= rearPosition < nextRearPos:
                 nextRearPos = rearPosition
+
         return nextCar, nextRearPos - frontPosition
 
     def acquire(self):
+        """
+        Add this LanePosition to the current lane
+        """
         if self.lane:
             self.free = False
             self.lane.addCarPosition(self)
 
     def release(self):
+        """
+        Remove this LanePosition from the current lane
+        """
         if not self.free and self.lane:
             self.free = True
             self.lane.removeCar(self)

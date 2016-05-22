@@ -21,6 +21,7 @@ class Lane(object):
         # self.length = haversine(self.source.center, self.target.center)
         # self.middleLine = None
         self.carsPosition = {}
+        self.blocked = False
 
         # self.update()
 
@@ -65,8 +66,8 @@ class Lane(object):
     #     self.length = self.middleLine.length
     #     self.direction = self.middleLine.direction
 
-    # def getTurnDirection(self, other):
-    #     return self.road.getTurnDirection(other.road)
+    def getTurnDirection(self, nextRoad):
+        return self.road.getTurnDirection(nextRoad)
 
     # def getDirection(self):
     #     return self.direction
@@ -131,3 +132,26 @@ class Lane(object):
 
     def getCars(self):
         return [cp.car for cp in self.carsPosition.values()]
+
+    def isBlocked(self):
+        return self.blocked
+
+    def setBlocked(self, b):
+        self.blocked = b
+
+    def getAvgSpeed(self):
+        if len(self.carsPosition) == 0:
+            return sys.maxint
+        return sum([lanePos.car.getSpeed() for lanePos in self.carsPosition.values()]) / len(self.carsPosition)
+
+    def canSwitchLane(self, position, carLength):
+        """
+        Check there is enough room for the car on the neighbor lane to switch to this lane.
+        :param position:
+        :return: boolean
+        """
+        carPositions = [(c.position - c.car.length / 2, c.position + c.car.length / 2) for c in self.carsPosition.values()]
+        for rear, front in carPositions:
+            if rear <= position <= front:
+                return False
+        return True

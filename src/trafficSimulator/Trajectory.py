@@ -44,13 +44,13 @@ class Trajectory(object):
         return self.current.lane
 
     def getRoad(self):
-        return self.lane.road
+        return self.current.lane.road
 
     def getOppositeRoad(self):
         source = self.current.lane.road.getSource()
         sourceCoords = source.center.getCoords()
         target = self.current.lane.road.getTarget()
-        for road in target.getRoads():
+        for road in target.getOutRoads():
             if road.target.center.getCoords() == sourceCoords:
                 return road
 
@@ -78,11 +78,7 @@ class Trajectory(object):
     #     # return self.lane.getDirection(self.getRelativePosition())
 
     def getCoords(self):
-        # if self.temp.lane:
-        #     return self.temp.lane.getPoint(self.getRelativePosition())
-        # else:
         return self.current.lane.getPoint(self.getRelativePosition())
-        # return self.lane.getPoint(self.getRelativePosition())
 
     def nextCarDistance(self):
         curCar, curDist = self.current.nextCarDistance()
@@ -105,7 +101,7 @@ class Trajectory(object):
 
     def isValidTurn(self):
         nextLane = self.car.nextLane
-        sourceLane = self.current.lane
+        # sourceLane = self.current.lane
         if not nextLane:
             print "no road to enter"
             return False
@@ -159,11 +155,8 @@ class Trajectory(object):
     def moveForward(self, distance):
         """
         :param distance:
-        :return:
         """
-        # print "car", self.car.id, "moves", distance, "from", self.current.lane.road.id, self.current.position,
-        distance = max(distance, 0)
-        if distance == 0:
+        if distance <= 0:
             return
         self.current.position += distance
         self.next.position += distance
@@ -186,7 +179,6 @@ class Trajectory(object):
             self.finishChangingLanes()
         if self.current.lane and not self.isChangingLanes and not self.car.nextLane:
             self.car.pickNextLane()
-        # print "to", self.current.lane.road.id, self.current.position
 
     def changeLane(self, nextLane):
         if self.isChangingLanes:
@@ -201,43 +193,64 @@ class Trajectory(object):
         if self.lane.road != nextLane.road:
             print "not neighbouring lanes"
             return
-        nextPosition = self.current.position + 3 * self.car.length
+        nextPosition = self.current.position + self.car.length
         if nextPosition >= self.current.lane.getLength():
             print "too late to change lane"
             return
         return self.startChangingLanes(nextLane, nextPosition)
 
-    def getIntersectionLaneChangeCurve(self):
-        return
+    def switchLane(self, targetLane):
+        """
+        Switch to the neighbor lane.
+        :param targetLane:
+        """
+        if self.isChangingLanes:
+            print "already changing lane"
+            return
+        if targetLane is None:
+            print "no target lane"
+            return
+        if self.current.lane.road != targetLane.road:
+            print "not on the same road"
+            return
+        if targetLane.canSwitchLane(self.current.position, self.car.length):
+            self.current.release()
+            self.current.lane = targetLane
+            self.current.acquire()
 
-    def getAdjacentLaneChangeCurve(self):
-        p1 = self.current.lane.getPoint(self.current.relativePosition())
-        p2 = self.next.lane.getPoint(self.next.relativePosition())
-        distance = p2.subtract(p1).length
-        direction1 = self.current.lane.middleLine.vector.normalized.mult(distance * 0.3)
-        control1 = p1.add(direction1)
-        direction2 = self.next.lane.middleLine.vector.normalized.mult(distance * 0.3)
-        control2 = p2.subtract(direction2)
-        return Curve(p1, p2, control1, control2)
 
-    def getCurve(self):
-        return self.getAdjacentLaneChangeCurve()
+
+    # def getIntersectionLaneChangeCurve(self):
+    #     return
+
+    # def getAdjacentLaneChangeCurve(self):
+    #     p1 = self.current.lane.getPoint(self.current.relativePosition())
+    #     p2 = self.next.lane.getPoint(self.next.relativePosition())
+    #     distance = p2.subtract(p1).length
+    #     direction1 = self.current.lane.middleLine.vector.normalized.mult(distance * 0.3)
+    #     control1 = p1.add(direction1)
+    #     direction2 = self.next.lane.middleLine.vector.normalized.mult(distance * 0.3)
+    #     control2 = p2.subtract(direction2)
+    #     return Curve(p1, p2, control1, control2)
+
+    # def getCurve(self):
+    #     return self.getAdjacentLaneChangeCurve()
 
     def startChangingLanes(self, nextLane, distance):
+        """
+        Change to the nextLane.
+        :param nextLane:
+        :param distance:
+        """
         if self.isChangingLanes:
             print "already changing lane"
         if nextLane is None:
             print "no next lane"
         self.isChangingLanes = True
-
-        # if self.current.position >= self.current.lane.length:
-        #     nextPosition = self.current.position - self.current.lane.length
-        # else:
-        #     nextPosition = 0
-
         self.next.lane = nextLane
         nextLaneCar, nextLaneCarPosition = self.next.nextCarDistance()
-        nextLaneCarPosition = nextLaneCarPosition if nextLaneCar else self.next.lane.getLength()
+        # if nextLaneCar is None, then the
+        # nextLaneCarPosition = nextLaneCarPosition if nextLaneCar else self.next.lane.getLength()  # TODO: check if we still need this
         remainderDistance = max(self.current.position - self.current.lane.getLength(), 0)
         nextPosition = min(remainderDistance, nextLaneCarPosition)
         self.next.position = nextPosition

@@ -4,12 +4,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from Shapefile import Shapefile
 from Road import Road
-from collections import defaultdict
 from Car import *
 import pygmaps
 import webbrowser
 import time
-
 from src.Dijkstra import *
 
 
@@ -32,17 +30,18 @@ class RealMap(object):
         self.roads = {}
         self.intersections = {}
         self.createMap()
-        self.board = self.she.getBoard()  #[top, bot, right, left] of this map
 
-        self.goalLocation = None
+        self.board = self.she.getBoard()  # [top, bot, right, left] of the borders of this map
+
+        self.goalLocation = None          # the car crash's location
         self.setRandomGoalPosition()
-        self.cars = {}
-        self.taxis = {}
-        self.reset = False
-        self.locDict = defaultdict(list)
-        self.aniMapPlotOK = False
-        self.carRunsOk = False
-        self.trafficTimeDict = {}
+
+        self.cars = {}                    # store all cars' id and instance
+        self.taxis = {}                   # store all taxis' id and instance
+        self.reset = False                # indicate whether it is in the middle (reset) of experiments
+        self.locDict = defaultdict(list)  # recode which car is on which lane
+        self.aniMapPlotOK = False         # indicate the map has been plotted
+        self.carRunsOk = False            # TODO: may not need this
 
     def createMap(self):
         """
@@ -71,21 +70,22 @@ class RealMap(object):
                         inter.addInRoad(rd)
                         self.roads[rd.id] = rd
                         sourceInter = rd.getSource()
-                        sourceInter.addRoad(rd)
+                        sourceInter.addOutRoad(rd)
 
                         # add a road for opposite direction
                         opRd = Road(rd.corners, rd.center, rd.getTarget(), rd.getSource())
-                        inter.addRoad(opRd)
+                        inter.addOutRoad(opRd)
                         sourceInter.addInRoad(opRd)
                         self.roads[opRd.id] = opRd
-                        if sourceInter.getRoads() and sourceInter.getInRoads() and sourceInter.id not in self.intersections:
+                        if sourceInter.getOutRoads() and sourceInter.getInRoads() and sourceInter.id not in self.intersections:
                             self.intersections[sourceInter.id] = sourceInter
 
-            if inter.getRoads() and inter.getInRoads():
+            if inter.getOutRoads() and inter.getInRoads():
                 self.intersections[inter.id] = inter
-                if len(inter.getRoads()) != len(inter.getInRoads()):
-                    print "intersection has different number of roads and in roads"
+                if len(inter.getOutRoads()) != len(inter.getInRoads()):
+                    print "intersection has different number of out and in roads"
 
+        # add control signal on each intersection
         for inter in self.intersections.values():
             inter.buildControlSignal()
 
@@ -98,7 +98,7 @@ class RealMap(object):
         removeRoads = []
         removeInters = []
         for inter in self.intersections.values():
-            if len(inter.getInRoads()) == 0 or len(inter.getRoads()) == 0:
+            if len(inter.getInRoads()) == 0 or len(inter.getOutRoads()) == 0:
                 removeInters.append(inter)
 
         for rd in self.roads.values():
@@ -106,6 +106,7 @@ class RealMap(object):
                 removeRoads.append(rd)
 
         print "remove", len(removeRoads), "roads and", len(removeInters), "intersections"
+
         for inter in removeInters:
             del self.intersections[inter.id]
         for rd in removeRoads:
@@ -118,10 +119,10 @@ class RealMap(object):
             if not road.lanes:
                 print "Err: no lane on a road"
         for inter in self.intersections.values():
-            roadNum = len(inter.getRoads())
+            roadNum = len(inter.getOutRoads())
             if roadNum == 0:
                 print "Err: intersection has no road"
-            for rd in inter.getRoads():
+            for rd in inter.getOutRoads():
                 if not rd.lanes:
                     print "Eff: road", rd.id, "has no lane"
 
@@ -132,16 +133,16 @@ class RealMap(object):
         for road in self.roads.values():
             if road.target.id not in allInter:
                 print "Err: target intersection not found"
-                print road.target.getRoads()
+                print road.target.getOutRoads()
                 print road.target.getInRoads()
                 self.intersections[road.target.id] = road.target
             if road.source.id not in allInter:
                 print "Err: source intersection not found"
-                print road.source.getRoads()
+                print road.source.getOutRoads()
                 print road.source.getInRoads()
                 self.intersections[road.source.id] = road.source
 
-        print "checking ends"
+        print "checking ended"
         print "using", (time.time() - start_time), "seconds"
 
     def getRoads(self):
@@ -201,31 +202,42 @@ class RealMap(object):
             car.release()
         self.cars = {}
 
-    def addRandomCars(self, num):
+    def addRandomCars(self, num, carType):
         """
         Add num cars into the self.cars dictionary by their id. If an id already exists in the dictionary, then
         update the dictionary with the car.
         :param num: the total number of cars to be added into the dictionary
         """
-        while len(self.cars) < num:
-            lane, position = self.randomLaneLocation()
-            if self.checkOverlap(lane, position):
-                car = Car(lane, position)
-                self.cars[car.id] = car
+        print "realmap add " + carType
+        if carType == "car":
+            carList = self.cars
+            carType = Car
+        elif carType == "taxi":
+            carList = self.taxis
+            carType = Taxi
+        else:
+            sys.stderr.write("RealMap: car type error:", carType)
+            sys.exit(2)
 
-    def addRandomTaxi(self, num):
-        """
-        Add num taxis into the self.taxis dictionary by their id. If an id already exists in the dictionary, then
-        update the dictionary with this taxi.
-        :param num: the total number of taxis to be added into the dictionary
-        """
-        while len(self.taxis) < num:
+        while len(carList) < num:
             lane, position = self.randomLaneLocation()
-            if self.checkOverlap(lane, position):
-                taxi = Taxi(lane, position)
-                self.taxis[taxi.id] = taxi
+            car = carType(lane, position)
+            if self.checkOverlap(lane, position, car.length):
+                carList[car.id] = car
 
-    def checkOverlap(self, lane, position):
+    # def addRandomTaxi(self, num):
+    #     """
+    #     Add num taxis into the self.taxis dictionary by their id. If an id already exists in the dictionary, then
+    #     update the dictionary with this taxi.
+    #     :param num: the total number of taxis to be added into the dictionary
+    #     """
+    #     while len(self.taxis) < num:
+    #         lane, position = self.randomLaneLocation()
+    #         if self.checkOverlap(lane, position):
+    #             taxi = Taxi(lane, position)
+    #             self.taxis[taxi.id] = taxi
+
+    def checkOverlap(self, lane, position, carLength):
         """
         Check whether the picked position for a car is overlapped with existing cars.
         :param locDict: the dictionary records all the cars' position on each lane
@@ -233,7 +245,7 @@ class RealMap(object):
         :param position: the given position to check
         :return: True if the car is not overlapped with existing cars; False otherwise
         """
-        half = 0.0025 / lane.getLength()  # TODO: consider different car length
+        half = carLength / lane.getLength()
         for (start, end) in self.locDict[lane]:
             if start <= position + half <= end or start <= position - half <= end:
                 return False
@@ -278,7 +290,7 @@ class RealMap(object):
         source = road.getSource()
         target = road.getTarget()
 
-        for rd in target.getRoads():
+        for rd in target.getOutRoads():
             if rd.getTarget.id == source.id:
                 return rd
 
@@ -288,7 +300,7 @@ class RealMap(object):
         :param intersection:
         :return: a list of intersections
         """
-        return [road.getTarget() for road in intersection.getRoads()]
+        return [road.getTarget() for road in intersection.getOutRoads()]
 
     def cost(self, sourceIntersection, targetIntersection):
         """
@@ -299,11 +311,15 @@ class RealMap(object):
         :return: return the traffic time (second)
         """
         road = None
-        for rd in sourceIntersection.getRoads():
+        for rd in sourceIntersection.getOutRoads():
             if rd.getTarget().id == targetIntersection.id:
                 road = rd
                 break
-        return (road.getLength() / road.getAvgSpeed()) * 3600
+        curAvgSpd = road.getCurAvgSpeed()
+        if curAvgSpd > 0:
+            return (road.getLength() / curAvgSpd) * 3600  # convert to second
+        else:
+            return sys.maxint
 
     def getRoadsBetweenIntersections(self, source, target):
         """
@@ -313,7 +329,7 @@ class RealMap(object):
         :return: a list of roads
         """
         roads = []
-        for road in source.getRoads() + target.getRoads():
+        for road in source.getOutRoads() + target.getOutRoads():
             if road.getTarget() == target and road.getSource() == source:
                 roads.append(road)
             elif road.getSource() == target and road.getTarget() == source:
@@ -328,11 +344,11 @@ class RealMap(object):
         """
         targetInter = pos.getTarget()
         sourceInter = pos.getSource()
-        roads = [road for road in targetInter.getRoads() if road.getTarget() != sourceInter]
+        roads = [road for road in targetInter.getOutRoads() if road.getTarget() != sourceInter]
         if roads:
             return roads
         else:
-            return targetInter.getRoads()
+            return targetInter.getOutRoads()
 
     def trafficTime(self, source, destination):
         """

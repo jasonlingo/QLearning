@@ -2,14 +2,12 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from QLearning import QLearning
 import math
-import time
-from Queue import PriorityQueue
+from QLearning import QLearning
 from Dijkstra import dijkstraSearch, dijkstraTrafficTime
 from DispatchQL import DispatchQL
-import random
-
+from Settings import MIN_EPSILON
+from trafficSimulator.TrafficSettings import MAX_SPEED
 
 class Experiment(object):
     """
@@ -30,6 +28,8 @@ class Experiment(object):
         self.taxiNum = taxiNum
         self.carNum = carNum
         self.epsilon = epsilon
+        self.defaultEps = epsilon
+        self.epsilonDict = {}
         self.alpha = alpha
         self.gamma = gamma
 
@@ -53,7 +53,7 @@ class Experiment(object):
 
         self.iteration = 0
         self.plotMap = False
-        self.goalLocation = self.env.getGoalLocation()
+        # self.goalLocation = self.env.getGoalLocation()
 
         self.progressCnt = 0
 
@@ -66,13 +66,15 @@ class Experiment(object):
         """
         self.initialization()
         self.iteration += 1
+        interval = 0.1         # second
 
         while not self.env.isGoalReached():
             self.showProgress()
 
-            interval = 0.1  # second
+            # move taxis and perform Q-learning on called taxis
             self.dispatchQL.go(interval)
 
+            # let other cars move
             if not self.env.isGoalReached():
                 for car in self.env.getCars().values():
                     car.move(interval)
@@ -94,6 +96,7 @@ class Experiment(object):
 
         self.env.addRandomCars(self.carNum)
         self.env.addRandomTaxis(self.taxiNum)
+        # self.env.addRandomTaxis(self.taxiNum)
         self.taxiList = self.env.getTaxis().values()
         self.allTaxis = self.taxiList[:]
         self.calledTaxiQL = []
@@ -141,6 +144,17 @@ class Experiment(object):
         sourceInter = goal.current.lane.road.getSource()
         taxi1, time1 = dijkstraSearch(self.env.realMap, sourceInter, self.allTaxis)
         taxi2, time2 = dijkstraSearch(self.env.realMap, targetInter, self.allTaxis)
+
+        # add time for a taxi to move from the source intersection to the goal position
+        curAvgSpd = goal.current.lane.road.getCurAvgSpeed()
+        if curAvgSpd > 0:
+            time1 += (goal.current.getPosition() / curAvgSpd) * 3600
+        else:
+            time1 = sys.maxint  # means the road is stuck
+
+        # add time for a taxi to move from the target intersection to the goal position (opposite direction)
+        time2 += ((goal.current.lane.road.getLength() - goal.current.getPosition()) / MAX_SPEED) * 3600
+
         return (taxi1, time1) if time1 < time2 else (taxi2, time2)
 
     def callTaxi(self, taxi):
@@ -148,11 +162,11 @@ class Experiment(object):
         Create a QLearning object that learns the Q value of this called taxi
         :param taxi: the called taxi
         """
-        goalLane = self.goalLocation.current.lane
+        goalLane = self.getGoalLocation().current.lane
         goalRoad = goalLane.road
-        goalPosition = self.goalLocation.current.position
+        goalPosition = self.getGoalLocation().current.position
         taxi.beenCalled(goalRoad, goalLane, goalPosition)
-        ql = QLearning(taxi, self.env, self.qvalue, self.nsa, self.getEpsilon())
+        ql = QLearning(taxi, self.env, self.qvalue, self.nsa, self.defaultEps)
         self.calledTaxiQL.append(ql)
         self.taxiList.remove(taxi)
         print ""
@@ -165,10 +179,11 @@ class Experiment(object):
         :param second: int
         :return: Boolean
         """
-        if not self.calledTaxiQL: return True
+        if not self.calledTaxiQL:
+            return True
 
         times = []
-        goalRoad = self.goalLocation.current.lane.road
+        goalRoad = self.getGoalLocation().current.lane.road
         goals = [goalRoad.getTarget(), goalRoad.getSource()]
         for ql in self.calledTaxiQL:
             taxiInter = ql.taxi.trajectory.current.lane.road.getTarget()
@@ -176,24 +191,28 @@ class Experiment(object):
         taxiInter = taxi.trajectory.current.lane.road.getTarget()
         timeForGivenTaxi = dijkstraTrafficTime(self.env.realMap, taxiInter, goals)
         for time in times:
-            if time < timeForGivenTaxi: return False
+            if time < timeForGivenTaxi + second:
+                return False
         return True
 
-    def getEpsilon(self):
+    def getEpsilon(self, initEps, iteration):
         """
         Reduce epsilon gradually when running the learning process for many iterations
         :return: the adjusted epsilon
         """
-        return max(0.05, self.epsilon * math.pow(0.9999, self.iteration))
+        key = (initEps, iteration)
+        if key not in self.epsilonDict:
+            self.epsilonDict[key] = max(MIN_EPSILON, self.epsilon * math.pow(0.9999, iteration))
+        return self.epsilonDict[key]
 
-    def addCarTaxi(self):
-        """
-        Generate taxis with random initial locations
-        :param taxiNum: the total number of taxis to be generated
-        :return: the list of generated taxis
-        """
-        self.env.addRandomCars(self.carNum)
-        self.env.addRandomTaxis(self.taxiNum)
+    # def addCarTaxi(self):
+    #     """
+    #     Generate taxis with random initial locations
+    #     :param taxiNum: the total number of taxis to be generated
+    #     :return: the list of generated taxis
+    #     """
+    #     self.env.addRandomCars(self.carNum)
+    #     self.env.addRandomTaxis(self.taxiNum)
 
     def getGoalLocation(self):
         return self.env.getGoalLocation()

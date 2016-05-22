@@ -19,8 +19,16 @@ SHAPEFILE_NAME = "/Users/Jason/GitHub/Research/QLearning/Data/Roads_All.dbf"
 MAX_SPEED = 60.0
 
 MAX_ROAD_LANE_NUM = 2
-"""Maximum lanes per road"""
+"""Maximum number of lanes per road"""
 
+CLOSE_CRASH_LANE = True
+"""block the lane where a crash happens"""
+
+CLOSE_ALL_CRASH_LANES = True
+"""block all the lanes of a road that a crash happens"""
 
 ANIMATION_LAPSE = 100
 """The interval (millisecond) between two animation frame"""
+
+CAR_LENGTH = 0.0045
+"""The length (in km) of a car"""

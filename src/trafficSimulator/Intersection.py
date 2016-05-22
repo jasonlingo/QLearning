@@ -19,12 +19,12 @@ class Intersection(object):
         self.center = center
         self.rect = rect
         self.id = Traffic.uniqueId(RoadType.INTERSECTION)
-        self.roads = []
+        self.outRoads = []
         self.inRoads = []
         self.controlSignals = ControlSignals(self)
 
     def update(self):
-        for rd in self.roads:
+        for rd in self.outRoads:
             rd.update()
         result = []
         for ird in self.inRoads:
@@ -34,15 +34,15 @@ class Intersection(object):
     def getId(self):
         return self.id
 
-    def getRoads(self):
-        return self.roads
+    def getOutRoads(self):
+        return self.outRoads
 
     def getInRoads(self):
         return self.inRoads
 
-    def addRoad(self, rd):
-        if rd.target.center.getCoords() not in [road.target.center.getCoords() for road in self.roads]:
-            self.roads.append(rd)
+    def addOutRoad(self, rd):
+        if rd.target.center.getCoords() not in [road.target.center.getCoords() for road in self.outRoads]:
+            self.outRoads.append(rd)
         # else:
         #     print "duplicated out road"
 
