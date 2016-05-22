@@ -42,7 +42,7 @@ class QLearning(object):
         oldPos = self.taxi.getPosition().lane.road
 
         # already at the same road with the goal location
-        if self.env.checkArriveGoal(oldPos):
+        if self.env.checkArriveGoal(oldPos): # TODO: not only has to be at the same road, but also need to be close
             self.env.setReachGoal(True)
             reward = self.env.getReward(oldPos, oldPos)
             self.learn(oldPos, oldPos, reward, oldPos)

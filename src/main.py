@@ -10,7 +10,7 @@ import time
 
 if __name__ == '__main__':
 
-    DEBUG = False
+    DEBUG = True
 
     def runExp():
         """
