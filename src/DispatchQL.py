@@ -64,7 +64,7 @@ class DispatchQL(QLearning):
         taxi = None
         if self.trialTime >= CHECK_INTERVAL:
             taxi = self.chooseAction(curState)
-            self.currStateAction = (curState, taxi)
+            self.currStateAction = (curState, taxi)  # TODO: action should be the position of a taxi, not a specific taxi
             if taxi in self.exp.taxiList:
                 self.exp.callTaxi(taxi)
             self.updateQvalueFlag = True
@@ -149,14 +149,18 @@ class DispatchQL(QLearning):
             actions = taxiMapping.keys()
             q = [self.qvalue.get((state, a), 0.0) for a in actions]
             maxQIdx = q.index(max(q))
-            if maxQIdx > 0:
-                action = actions[maxQIdx]
-                taxi = taxiMapping[action]
-            else:
-                # taxi, trafficTime = self.exp.findFastestTaxi()
-                taxi = random.choice(self.exp.allTaxis)
+            action = actions[maxQIdx]
+            taxi = taxiMapping[action]
 
-            # if not self.exp.isQuicker(taxi, CHECK_INTERVAL):
-            #     taxi = None
+            # TODO: why use following logic
+            # if maxQIdx > 0:
+            #     action = actions[maxQIdx]
+            #     taxi = taxiMapping[action]
+            # else:
+            #     # taxi, trafficTime = self.exp.findFastestTaxi()
+            #     taxi = random.choice(self.exp.allTaxis)
+
+            if not self.exp.isQuicker(taxi, CHECK_INTERVAL):
+                taxi = None
         return taxi
 

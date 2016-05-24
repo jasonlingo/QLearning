@@ -66,7 +66,7 @@ class Experiment(object):
         """
         self.initialization()
         self.iteration += 1
-        interval = 0.1         # second
+        interval = 1         # second
 
         while not self.env.isGoalReached():
             self.showProgress()

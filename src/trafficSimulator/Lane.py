@@ -115,19 +115,19 @@ class Lane(object):
             return []
         next = []
         shortestDist = sys.maxint
-        for car in self.carsPosition.itervalues():
-            if car.isGoalFlag:
-                next.append(car)
+        for cp in self.carsPosition.itervalues():
+            if cp.isGoalFlag:
+                next.append(cp)
                 continue
-            if car.position is None:
+            if cp.position is None:
                 print "the car has no position"
                 continue
-            if car.car.id == carPos.car.id:
+            if cp.car.id == carPos.car.id:
                 continue
-            distance = car.position - carPos.position
-            if not car.free and (0 < distance < shortestDist):  # only pick the cars in front of current car
+            distance = cp.position - carPos.position
+            if not cp.free and (0 < distance < shortestDist):  # only pick the cars in front of current car
                 shortestDist = distance
-                next.append(car)
+                next.append(cp)
         return next
 
     def getCars(self):

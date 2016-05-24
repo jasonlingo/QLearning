@@ -65,12 +65,12 @@ class Car(object):
         """
         self.speed = min(self.maxSpeed, max(round(speed, 10), 0))
 
-    def getDirection(self):
-        """
-        Get the current direction of this car.
-        :return:
-        """
-        return self.trajectory.direction  #FIXME: error attribute
+    # def getDirection(self):
+    #     """
+    #     Get the current direction of this car.
+    #     :return:
+    #     """
+    #     return self.trajectory.direction  #FIXME: error attribute
 
     def release(self):
         self.trajectory.release()
@@ -81,10 +81,11 @@ class Car(object):
         For the detail of this model, refer to https://en.wikipedia.org/wiki/Intelligent_driver_model
         :return: accelerating speed
         """
-        timeHeadway = 1.5        # second
-        distGap = 0.002          # km
-        maxAcceleration = 0.001  # the maximum acceleration (km/s^2)
-        maxDeceleration = 0.003  # the maximum deceleration (km/s^2)
+        # some constant parameters
+        TIME_HEAD_AWAY   = 1.5    # second
+        DIST_GAP         = 0.002  # km
+        MAX_ACCELERATION = 0.001  # the maximum acceleration (km/s^2)
+        MAX_DECELERATION = 0.003  # the maximum deceleration (km/s^2)
 
         nextCar, nextDistance = self.trajectory.nextCarDistance()
         distanceToNextCar = max(nextDistance, 0)
@@ -92,24 +93,25 @@ class Car(object):
         speedRatio = (self.speed / self.maxSpeed)
         freeRoadCoeff = pow(speedRatio, 4)
 
-        timeGap = self.speed * timeHeadway / 3600.0  # (km/h) * (second/3600)
-        breakGap = self.speed * deltaSpeed / (2 * math.sqrt(maxAcceleration * maxDeceleration))
-        safeDistance = distGap + timeGap + breakGap
+        timeGap = self.speed * TIME_HEAD_AWAY / 3600.0  # (km/h) * (second/3600)
+        breakGap = self.speed * deltaSpeed / (2 * math.sqrt(MAX_ACCELERATION * MAX_DECELERATION))
+        safeDistance = DIST_GAP + timeGap + breakGap
         if distanceToNextCar > 0:
             distRatio = (safeDistance / float(distanceToNextCar))
             busyRoadCoeff = pow(distRatio, 2)
         else:
             busyRoadCoeff = sys.maxint
 
-        safeIntersectionDist = 0.001 + timeGap + pow(self.speed, 2) / (2 * maxDeceleration)
-        if self.trajectory.distanceToStopLine() > 0:
-            safeInterDistRatio = (safeIntersectionDist / float(self.trajectory.distanceToStopLine() if self.trajectory.distanceToStopLine() > 0 else 0.0001))
+        safeIntersectionDist = 0.001 + timeGap + pow(self.speed, 2) / (2 * MAX_DECELERATION)
+        distanceToStopLine = self.trajectory.distanceToStopLine()
+        if distanceToStopLine > 0:
+            safeInterDistRatio = (safeIntersectionDist / float(distanceToStopLine if distanceToStopLine > 0 else 0.0001))
             intersectionCoeff = pow(safeInterDistRatio, 2)
         else:
             intersectionCoeff = sys.maxint
 
         coeff = 1 - freeRoadCoeff - busyRoadCoeff - intersectionCoeff
-        return round(maxAcceleration * coeff, 10)
+        return round(MAX_ACCELERATION * coeff, 10)
 
     def move(self, second):
         """
@@ -128,10 +130,10 @@ class Car(object):
         #     turnNumber = currentLane.getTurnDirection(self.nextLane)
 
         # choose a quicker lane
-        # currentLane = self.trajectory.current.lane
-        # preferedLane = self.getPreferedLane()
-        # if preferedLane != currentLane:
-        #     self.trajectory.switchLane(preferedLane)
+        currentLane = self.trajectory.current.lane
+        preferedLane = self.getPreferedLane()
+        if preferedLane != currentLane:
+            self.trajectory.switchLane(preferedLane)
 
         step = max(self.speed * second / 3600.0 + 0.5 * acceleration * math.pow(second, 2), 0)
         nextCarDist = max(self.trajectory.nextCarDistance()[1], 0)

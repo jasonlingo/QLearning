@@ -1,6 +1,6 @@
+from collections import Counter
 import random
-import sys
-import Settings
+
 
 class QLearning(object):
     """
@@ -42,14 +42,15 @@ class QLearning(object):
         oldPos = self.taxi.getPosition().lane.road
 
         # already at the same road with the goal location
-        if self.env.checkArriveGoal(oldPos): # TODO: not only has to be at the same road, but also need to be close
+        if self.env.checkArriveGoal(oldPos): # TODO: not only has to be at the same road, but also need to be close to the crash's location
             self.env.setReachGoal(True)
             reward = self.env.getReward(oldPos, oldPos)
             self.learn(oldPos, oldPos, reward, oldPos)
             return
 
         action = self.chooseAction(oldPos)  # road
-        self.taxi.setNextLane(action.lanes[0])
+        nextLane = action.getFastestLane()
+        self.taxi.setNextLane(nextLane)
         self.taxi.move(second)
         nextPos = self.taxi.getPosition().lane.road  # current road
 
@@ -99,8 +100,12 @@ class QLearning(object):
             action = random.choice(actions)  # exploration
         else:
             q = [self.qvalue.get((state, a), 0.0) for a in actions]
-            maxQIdx = q.index(max(q))
-            action = actions[maxQIdx]
+            if len(Counter(q)) == 1 and 0.0 in q:
+                # when all actions have not been taken before
+                action = random.choice(actions)
+            else:
+                maxQIdx = q.index(max(q))
+                action = actions[maxQIdx]
         return action
 
     def getTaxi(self):

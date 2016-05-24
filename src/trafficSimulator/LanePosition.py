@@ -54,7 +54,8 @@ class LanePosition(object):
 
         # find the nearest car in front of this car
         nextCar = None
-        nextRearPos = self.lane.getLength() if self.lane else sys.maxint
+        # nextRearPos = self.lane.getLength() if self.lane else sys.maxint
+        nextRearPos = sys.maxint
         for lanePosition in nextLanePossitions:
             # if lanePosition.isGoal() and not self.car.isTaxi: # FIXME: check if still need this
             #     continue

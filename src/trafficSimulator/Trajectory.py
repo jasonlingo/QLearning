@@ -156,7 +156,7 @@ class Trajectory(object):
         """
         :param distance:
         """
-        if distance <= 0:
+        if distance < 0:
             return
         self.current.position += distance
         self.next.position += distance
@@ -175,7 +175,7 @@ class Trajectory(object):
 
         if self.isChangingLanes and self.next.free:# and self.temp.position + gap > (self.temp.lane.length if self.temp.lane else 0):
             self.next.acquire()
-        if self.isChangingLanes: # and tempRelativePosition >= 1:
+        if self.isChangingLanes:  # and tempRelativePosition >= 1:
             self.finishChangingLanes()
         if self.current.lane and not self.isChangingLanes and not self.car.nextLane:
             self.car.pickNextLane()
